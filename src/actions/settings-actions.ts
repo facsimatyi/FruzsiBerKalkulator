@@ -6,13 +6,18 @@ import { db } from "@/lib/db";
 import { userSettings, settingsPeriods } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
+/** Parse number handling Hungarian comma decimal (3,85 → 3.85) */
+function parseNum(val: FormDataEntryValue | null): number {
+  return Number(String(val ?? "").replace(",", "."));
+}
+
 export async function updateSettings(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Nem vagy bejelentkezve" };
 
-  const illetmeny = Number(formData.get("illetmeny"));
-  const hoursPerDay = Number(formData.get("hoursPerDay"));
-  const selectedBer = Number(formData.get("selectedBer"));
+  const illetmeny = parseNum(formData.get("illetmeny"));
+  const hoursPerDay = parseNum(formData.get("hoursPerDay"));
+  const selectedBer = parseNum(formData.get("selectedBer"));
 
   if (isNaN(illetmeny) || isNaN(hoursPerDay) || isNaN(selectedBer)) {
     return { error: "Érvénytelen adatok" };
@@ -38,11 +43,11 @@ export async function upsertSettingsPeriod(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Nem vagy bejelentkezve" };
 
-  const effectiveYear = Number(formData.get("effectiveYear"));
-  const effectiveMonth = Number(formData.get("effectiveMonth"));
-  const illetmeny = Number(formData.get("illetmeny"));
-  const hoursPerDay = Number(formData.get("hoursPerDay"));
-  const selectedBer = Number(formData.get("selectedBer") ?? -1);
+  const effectiveYear = parseNum(formData.get("effectiveYear"));
+  const effectiveMonth = parseNum(formData.get("effectiveMonth"));
+  const illetmeny = parseNum(formData.get("illetmeny"));
+  const hoursPerDay = parseNum(formData.get("hoursPerDay"));
+  const selectedBer = parseNum(formData.get("selectedBer"));
 
   if (isNaN(effectiveYear) || isNaN(effectiveMonth) || isNaN(illetmeny) || isNaN(hoursPerDay)) {
     return { error: "Érvénytelen adatok" };

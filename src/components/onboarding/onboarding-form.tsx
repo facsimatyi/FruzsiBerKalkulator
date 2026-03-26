@@ -18,8 +18,9 @@ export function OnboardingForm() {
   const [selectedBer, setSelectedBer] = useState(-1);
   const [pending, startTransition] = useTransition();
 
-  const illetmeny = Number(illetmenyStr) || 0;
-  const hoursPerDay = Number(hoursStr) || 0;
+  const parseNum = (s: string) => Number(s.replace(",", ".")) || 0;
+  const illetmeny = parseNum(illetmenyStr);
+  const hoursPerDay = parseNum(hoursStr);
   const orabér = hoursPerDay > 0 ? illetmeny / ((174 * hoursPerDay) / 8) : 0;
 
   const handleSave = () => {

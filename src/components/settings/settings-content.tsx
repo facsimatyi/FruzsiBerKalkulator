@@ -15,6 +15,11 @@ import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import type { SettingsPeriod } from "@/db/schema";
 
+/** Parse number from string, handling Hungarian comma decimal separator */
+function parseNum(s: string): number {
+  return Number(s.replace(",", ".")) || 0;
+}
+
 interface Props {
   illetmeny: number;
   hoursPerDay: number;
@@ -31,16 +36,16 @@ export function SettingsContent({
   const [illetmenyStr, setIlletmenyStr] = useState(String(initIlletmeny));
   const [hoursStr, setHoursStr] = useState(String(initHours));
   const [selectedBer, setSelectedBer] = useState(initBer);
-  const illetmeny = Number(illetmenyStr) || 0;
-  const hoursPerDay = Number(hoursStr) || 0;
+  const illetmeny = parseNum(illetmenyStr);
+  const hoursPerDay = parseNum(hoursStr);
   const [pending, startTransition] = useTransition();
   const [showAddPeriod, setShowAddPeriod] = useState(false);
   const [newYear, setNewYear] = useState(new Date().getFullYear());
   const [newMonth, setNewMonth] = useState(new Date().getMonth());
   const [newIlletmenyStr, setNewIlletmenyStr] = useState(String(initIlletmeny));
   const [newHoursStr, setNewHoursStr] = useState(String(initHours));
-  const newIlletmeny = Number(newIlletmenyStr) || 0;
-  const newHours = Number(newHoursStr) || 0;
+  const newIlletmeny = parseNum(newIlletmenyStr);
+  const newHours = parseNum(newHoursStr);
 
   const orabér = illetmeny / ((174 * hoursPerDay) / 8);
 
