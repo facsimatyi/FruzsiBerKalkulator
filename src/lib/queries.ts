@@ -32,14 +32,11 @@ export async function getSettingsForMonth(
     .where(
       and(
         eq(settingsPeriods.userId, userId),
-        lte(
-          sql`${settingsPeriods.effectiveYear} * 12 + ${settingsPeriods.effectiveMonth}`,
-          targetVal
-        )
+        sql`(${settingsPeriods.effectiveYear} * 12 + ${settingsPeriods.effectiveMonth}) <= ${targetVal}`
       )
     )
     .orderBy(
-      desc(sql`${settingsPeriods.effectiveYear} * 12 + ${settingsPeriods.effectiveMonth}`)
+      desc(sql`(${settingsPeriods.effectiveYear} * 12 + ${settingsPeriods.effectiveMonth})`)
     )
     .limit(1);
 
