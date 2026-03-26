@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
-import { SessionProvider } from "next-auth/react";
-import { ThemeProvider } from "next-themes";
+import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -47,12 +46,10 @@ export default function RootLayout({
   return (
     <html lang="hu" className={`${geist.variable} h-full antialiased`} suppressHydrationWarning>
       <body className="min-h-full flex flex-col font-[family-name:var(--font-geist-sans)]">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <SessionProvider>
-            {children}
-            <Toaster position="top-center" richColors />
-          </SessionProvider>
-        </ThemeProvider>
+        <Providers>
+          {children}
+          <Toaster position="top-center" richColors />
+        </Providers>
       </body>
     </html>
   );
