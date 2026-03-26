@@ -10,8 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { BERTABLA, MFULL, fmt } from "@/lib/calculations/constants";
 import { toast } from "sonner";
-import { Plus, Trash2, AlertTriangle } from "lucide-react";
+import { Plus, Trash2, AlertTriangle, Sun, Moon, Monitor } from "lucide-react";
 import { signOut } from "next-auth/react";
+import { useTheme } from "next-themes";
 import type { SettingsPeriod } from "@/db/schema";
 
 interface Props {
@@ -284,6 +285,16 @@ export function SettingsContent({
         </CardContent>
       </Card>
 
+      {/* Megjelenés */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm">Megjelenés</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ThemeSelector />
+        </CardContent>
+      </Card>
+
       {/* Profil szekció */}
       <Card>
         <CardHeader className="pb-3">
@@ -455,6 +466,35 @@ function DeleteAccountSection() {
           Mégsem
         </Button>
       </div>
+    </div>
+  );
+}
+
+function ThemeSelector() {
+  const { theme, setTheme } = useTheme();
+
+  const options = [
+    { value: "system", label: "Rendszer", icon: Monitor },
+    { value: "light", label: "Világos", icon: Sun },
+    { value: "dark", label: "Sötét", icon: Moon },
+  ] as const;
+
+  return (
+    <div className="flex gap-2">
+      {options.map((opt) => (
+        <button
+          key={opt.value}
+          onClick={() => setTheme(opt.value)}
+          className={`flex-1 flex flex-col items-center gap-1.5 p-3 rounded-lg border transition-colors ${
+            theme === opt.value
+              ? "border-primary bg-primary/5 text-primary"
+              : "border-border text-muted-foreground hover:text-foreground hover:border-foreground/20"
+          }`}
+        >
+          <opt.icon className="h-4 w-4" />
+          <span className="text-xs font-medium">{opt.label}</span>
+        </button>
+      ))}
     </div>
   );
 }
