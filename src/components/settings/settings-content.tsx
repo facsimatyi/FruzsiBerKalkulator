@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { updateSettings, upsertSettingsPeriod, deleteSettingsPeriod } from "@/actions/settings-actions";
+import { changePassword, deleteAccount } from "@/actions/auth-actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { BERTABLA, MFULL, fmt } from "@/lib/calculations/constants";
 import { toast } from "sonner";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, AlertTriangle } from "lucide-react";
+import { signOut } from "next-auth/react";
 import type { SettingsPeriod } from "@/db/schema";
 
 interface Props {
@@ -281,6 +283,178 @@ export function SettingsContent({
           )}
         </CardContent>
       </Card>
+
+      {/* Profil szekció */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm">Profil</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Jelszó változtatás */}
+          <ChangePasswordSection />
+          <Separator />
+          {/* Account törlés */}
+          <DeleteAccountSection />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function ChangePasswordSection() {
+  const [open, setOpen] = useState(false);
+  const [currentPw, setCurrentPw] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [pending, startTransition] = useTransition();
+
+  const handleSubmit = () => {
+    startTransition(async () => {
+      const fd = new FormData();
+      fd.set("currentPassword", currentPw);
+      fd.set("newPassword", newPw);
+      fd.set("confirmPassword", confirmPw);
+      const result = await changePassword(fd);
+      if (result?.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Jelszó megváltoztatva");
+        setOpen(false);
+        setCurrentPw("");
+        setNewPw("");
+        setConfirmPw("");
+      }
+    });
+  };
+
+  if (!open) {
+    return (
+      <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => setOpen(true)}>
+        Jelszó módosítása
+      </Button>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="space-y-1.5">
+        <Label className="text-xs">Jelenlegi jelszó</Label>
+        <Input
+          type="password"
+          value={currentPw}
+          onChange={(e) => setCurrentPw(e.target.value)}
+          className="text-sm"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="text-xs">Új jelszó</Label>
+        <Input
+          type="password"
+          value={newPw}
+          onChange={(e) => setNewPw(e.target.value)}
+          className="text-sm"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="text-xs">Új jelszó megerősítése</Label>
+        <Input
+          type="password"
+          value={confirmPw}
+          onChange={(e) => setConfirmPw(e.target.value)}
+          className="text-sm"
+        />
+      </div>
+      <div className="flex gap-2">
+        <Button size="sm" className="text-xs" onClick={handleSubmit} disabled={pending}>
+          Mentés
+        </Button>
+        <Button size="sm" variant="ghost" className="text-xs" onClick={() => setOpen(false)}>
+          Mégsem
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function DeleteAccountSection() {
+  const [open, setOpen] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmText, setConfirmText] = useState("");
+  const [pending, startTransition] = useTransition();
+
+  const handleDelete = () => {
+    if (confirmText !== "TÖRLÉS") {
+      toast.error("Írd be: TÖRLÉS");
+      return;
+    }
+    startTransition(async () => {
+      const fd = new FormData();
+      fd.set("password", password);
+      const result = await deleteAccount(fd);
+      if (result?.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Fiók törölve");
+        signOut({ callbackUrl: "/login" });
+      }
+    });
+  };
+
+  if (!open) {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        className="w-full text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+        onClick={() => setOpen(true)}
+      >
+        Fiók törlése
+      </Button>
+    );
+  }
+
+  return (
+    <div className="space-y-3 p-3 rounded-lg border border-destructive/30 bg-destructive/5">
+      <div className="flex items-center gap-2 text-destructive">
+        <AlertTriangle className="h-4 w-4" />
+        <span className="text-xs font-semibold">Fiók végleges törlése</span>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Minden adatod véglegesen törlődik: műszakok, beállítások, pótlékok. Ez nem vonható vissza!
+      </p>
+      <div className="space-y-1.5">
+        <Label className="text-xs">Jelszó megerősítés</Label>
+        <Input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="text-sm"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="text-xs">Írd be: TÖRLÉS</Label>
+        <Input
+          type="text"
+          value={confirmText}
+          onChange={(e) => setConfirmText(e.target.value)}
+          placeholder="TÖRLÉS"
+          className="text-sm"
+        />
+      </div>
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          variant="destructive"
+          className="text-xs"
+          onClick={handleDelete}
+          disabled={pending || confirmText !== "TÖRLÉS" || !password}
+        >
+          {pending ? "Törlés..." : "Véglegesen törlöm"}
+        </Button>
+        <Button size="sm" variant="ghost" className="text-xs" onClick={() => { setOpen(false); setPassword(""); setConfirmText(""); }}>
+          Mégsem
+        </Button>
+      </div>
     </div>
   );
 }

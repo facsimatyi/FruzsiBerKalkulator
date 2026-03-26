@@ -5,8 +5,9 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { users, userSettings } from "@/db/schema";
 import { registerSchema } from "@/lib/validators";
-import { signIn } from "@/lib/auth";
+import { signIn, auth } from "@/lib/auth";
 import { AuthError } from "next-auth";
+import { revalidatePath } from "next/cache";
 
 export async function registerUser(_prevState: unknown, formData: FormData) {
   const raw = {
@@ -65,4 +66,66 @@ export async function loginUser(_prevState: unknown, formData: FormData) {
     // NEXT_REDIRECT is not an AuthError — must rethrow
     throw error;
   }
+}
+
+export async function changePassword(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Nem vagy bejelentkezve" };
+
+  const currentPassword = formData.get("currentPassword") as string;
+  const newPassword = formData.get("newPassword") as string;
+  const confirmPassword = formData.get("confirmPassword") as string;
+
+  if (!currentPassword || !newPassword) {
+    return { error: "Minden mező kitöltése kötelező" };
+  }
+  if (newPassword.length < 6) {
+    return { error: "Az új jelszó legalább 6 karakter legyen" };
+  }
+  if (newPassword !== confirmPassword) {
+    return { error: "A jelszavak nem egyeznek" };
+  }
+
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, session.user.id))
+    .limit(1);
+
+  if (!user) return { error: "Felhasználó nem található" };
+
+  const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!valid) return { error: "Hibás jelenlegi jelszó" };
+
+  const newHash = await bcrypt.hash(newPassword, 12);
+  await db
+    .update(users)
+    .set({ passwordHash: newHash })
+    .where(eq(users.id, session.user.id));
+
+  return { success: true };
+}
+
+export async function deleteAccount(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Nem vagy bejelentkezve" };
+
+  const password = formData.get("password") as string;
+  if (!password) return { error: "Add meg a jelszavad a törléshez" };
+
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(users.id, session.user.id))
+    .limit(1);
+
+  if (!user) return { error: "Felhasználó nem található" };
+
+  const valid = await bcrypt.compare(password, user.passwordHash);
+  if (!valid) return { error: "Hibás jelszó" };
+
+  // CASCADE delete removes all related data (settings, shifts, kedvezmeny_map, settings_periods)
+  await db.delete(users).where(eq(users.id, session.user.id));
+
+  return { success: true, deleted: true };
 }
