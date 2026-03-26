@@ -26,6 +26,13 @@ function fmtInput(n: number): string {
   return n.toLocaleString("hu-HU").replace(/,/g, " ");
 }
 
+/** Live format: strip non-digits, format with spaces, preserve cursor */
+function liveFormatMoney(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  if (!digits) return "";
+  return Number(digits).toLocaleString("hu-HU").replace(/,/g, " ");
+}
+
 interface Props {
   illetmeny: number;
   hoursPerDay: number;
@@ -146,18 +153,10 @@ export function SettingsContent({
                 inputMode="numeric"
                 value={illetmenyStr}
                 onChange={(e) => {
-                  setIlletmenyStr(e.target.value);
+                  setIlletmenyStr(liveFormatMoney(e.target.value));
                   setSelectedBer(-1);
                 }}
-                onBlur={() => {
-                  if (illetmeny > 0) {
-                    setIlletmenyStr(fmtInput(illetmeny));
-                    save(illetmeny, hoursPerDay, -1);
-                  }
-                }}
-                onFocus={(e) => {
-                  if (illetmeny > 0) setIlletmenyStr(String(illetmeny));
-                }}
+                onBlur={() => { if (illetmeny > 0) save(illetmeny, hoursPerDay, -1); }}
                 className="text-sm tabular-nums"
               />
             </div>
@@ -245,9 +244,7 @@ export function SettingsContent({
                     type="text"
                     inputMode="numeric"
                     value={newIlletmenyStr}
-                    onChange={(e) => setNewIlletmenyStr(e.target.value)}
-                    onBlur={() => { if (newIlletmeny > 0) setNewIlletmenyStr(fmtInput(newIlletmeny)); }}
-                    onFocus={() => { if (newIlletmeny > 0) setNewIlletmenyStr(String(newIlletmeny)); }}
+                    onChange={(e) => setNewIlletmenyStr(liveFormatMoney(e.target.value))}
                     className="text-sm"
                   />
                 </div>
