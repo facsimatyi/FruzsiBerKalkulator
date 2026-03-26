@@ -50,12 +50,14 @@ export interface MonthCalcResult {
   totalH: number;
   napszakH: { normal: number; delutan: number; ejszaka: number };
   unnepH: number;
+  hetvegeH: number;
   pihenoH: number;
   behivasH: number;
   tuloraH: number;
   delutanPotlek: number;
   ejszakaPotlek: number;
   unnepPotlek: number;
+  hetvegePotlek: number;
   pihenoPotlek: number;
   tuloraPotlek: number;
   behivasPotlek: number;

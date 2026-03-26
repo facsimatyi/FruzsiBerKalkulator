@@ -1,4 +1,4 @@
-import { eq, and, gte, lt } from "drizzle-orm";
+import { eq, and, gte, lt, or } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { shifts, userSettings, kedvezmenyMap } from "@/db/schema";
 import type { ShiftData } from "@/lib/calculations/constants";
@@ -20,14 +20,16 @@ export async function getMonthShifts(
   const start = new Date(year, month, 1);
   const end = new Date(year, month + 1, 1);
 
+  // Get shifts that OVERLAP this month (not just start in it)
+  // A shift overlaps if: startTime < monthEnd AND endTime > monthStart
   const rows = await db
     .select()
     .from(shifts)
     .where(
       and(
         eq(shifts.userId, userId),
-        gte(shifts.startTime, start),
-        lt(shifts.startTime, end)
+        lt(shifts.startTime, end),
+        gte(shifts.endTime, start)
       )
     )
     .orderBy(shifts.startTime);
@@ -55,8 +57,8 @@ export async function getAllShiftsForCalc(
     .where(
       and(
         eq(shifts.userId, userId),
-        gte(shifts.startTime, start),
-        lt(shifts.startTime, end)
+        lt(shifts.startTime, end),
+        gte(shifts.endTime, start)
       )
     )
     .orderBy(shifts.startTime);

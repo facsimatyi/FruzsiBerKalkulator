@@ -33,7 +33,10 @@ export function ShiftForm({ year, month, onSuccess }: Props) {
     if (!startTime) return;
     const s = new Date(startTime);
     s.setHours(s.getHours() + h);
-    setEndTime(s.toISOString().slice(0, 16));
+    const pad2 = (n: number) => String(n).padStart(2, "0");
+    setEndTime(
+      `${s.getFullYear()}-${pad2(s.getMonth() + 1)}-${pad2(s.getDate())}T${pad2(s.getHours())}:${pad2(s.getMinutes())}`
+    );
   };
 
   const isValid =

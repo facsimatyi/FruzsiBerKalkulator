@@ -56,8 +56,12 @@ export async function loginUser(_prevState: unknown, formData: FormData) {
     });
   } catch (error) {
     if (error instanceof AuthError) {
-      return { error: "Hibás email vagy jelszó" };
+      if (error.type === "CredentialsSignin") {
+        return { error: "Hibás email vagy jelszó" };
+      }
+      return { error: "Hiba történt a bejelentkezés során" };
     }
+    // NEXT_REDIRECT is not an AuthError — must rethrow
     throw error;
   }
 }

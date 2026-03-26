@@ -168,8 +168,9 @@ export function DashboardContent({
             </p>
             <p className="text-xs text-muted-foreground">
               {calc.unnepH > 0 ? `Ünnep ${calc.unnepH.toFixed(0)}h ` : ""}
+              {calc.hetvegeH > 0 ? `Hétvége ${calc.hetvegeH.toFixed(0)}h ` : ""}
               {calc.tuloraH > 0 ? `Túlóra ${calc.tuloraH.toFixed(0)}h` : ""}
-              {calc.unnepH === 0 && calc.tuloraH === 0 ? "—" : ""}
+              {calc.unnepH === 0 && calc.hetvegeH === 0 && calc.tuloraH === 0 ? "—" : ""}
             </p>
           </CardContent>
         </Card>

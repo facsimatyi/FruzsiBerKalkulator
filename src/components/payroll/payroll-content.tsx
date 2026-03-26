@@ -122,6 +122,11 @@ export function PayrollContent({
             sub
           />
           <Row
+            label="Hétvége (+100%)"
+            value={`${calc.hetvegeH.toFixed(1)}h → ${fmt(calc.hetvegePotlek)} Ft`}
+            sub
+          />
+          <Row
             label="Pihenőnap (+100%)"
             value={`${calc.pihenoH.toFixed(1)}h → ${fmt(calc.pihenoPotlek)} Ft`}
             sub
