@@ -12,6 +12,15 @@ const geist = Geist({
 export const metadata: Metadata = {
   title: "OMSZ Bérkalkulátor",
   description: "Mentős bér- és pótlékszámító alkalmazás",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Bérkalkulátor",
+  },
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
