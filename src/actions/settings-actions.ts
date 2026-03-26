@@ -37,7 +37,6 @@ export async function updateSettings(formData: FormData) {
     .set(updateData)
     .where(eq(userSettings.userId, session.user.id));
 
-  revalidatePath("/", "layout");
   revalidatePath("/settings");
   revalidatePath("/dashboard");
   revalidatePath("/payroll");

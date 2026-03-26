@@ -43,8 +43,8 @@ export function OnboardingForm() {
         toast.error(result.error);
       } else {
         toast.success("Beállítások mentve!");
-        // Hard redirect to force server-side layout re-render
-        window.location.href = "/dashboard";
+        router.push("/dashboard");
+        router.refresh();
       }
     });
   };
