@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 export function OnboardingForm() {
   const router = useRouter();
   const [step, setStep] = useState(0);
+  const [birthDate, setBirthDate] = useState("");
   const [illetmenyStr, setIlletmenyStr] = useState("");
   const [hoursStr, setHoursStr] = useState("");
   const [selectedBer, setSelectedBer] = useState(-1);
@@ -22,6 +23,9 @@ export function OnboardingForm() {
   const illetmeny = parseNum(illetmenyStr);
   const hoursPerDay = parseNum(hoursStr);
   const orabér = hoursPerDay > 0 ? illetmeny / ((174 * hoursPerDay) / 8) : 0;
+
+  const birthYear = birthDate ? Number(birthDate.split("-")[0]) : 0;
+  const age = birthYear ? new Date().getFullYear() - birthYear : 0;
 
   const handleSave = () => {
     if (illetmeny <= 0 || hoursPerDay <= 0) {
@@ -33,6 +37,7 @@ export function OnboardingForm() {
       fd.set("illetmeny", String(illetmeny));
       fd.set("hoursPerDay", String(hoursPerDay));
       fd.set("selectedBer", String(selectedBer));
+      if (birthDate) fd.set("birthDate", birthDate);
       const result = await updateSettings(fd);
       if (result?.error) {
         toast.error(result.error);
@@ -59,6 +64,41 @@ export function OnboardingForm() {
         {step === 0 && (
           <Card>
             <CardHeader className="pb-3">
+              <CardTitle className="text-base">Születési dátum</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-xs text-muted-foreground">
+                A 25 év alatti SZJA kedvezmény automatikus számításához
+              </p>
+              <Input
+                type="date"
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                className="text-center text-lg"
+                max={new Date().toISOString().split("T")[0]}
+              />
+              {age > 0 && (
+                <p className="text-xs text-center text-muted-foreground">
+                  {age < 25 ? (
+                    <span className="text-green-600 font-medium">✓ {age} éves — SZJA kedvezmény jár</span>
+                  ) : (
+                    <span>{age} éves — SZJA kedvezmény nem jár</span>
+                  )}
+                </p>
+              )}
+              <Button
+                className="w-full"
+                onClick={() => setStep(1)}
+              >
+                {birthDate ? "Tovább" : "Kihagyom"}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {step === 1 && (
+          <Card>
+            <CardHeader className="pb-3">
               <CardTitle className="text-base">Hány órás a munkanapod?</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -79,24 +119,29 @@ export function OnboardingForm() {
                 <Input
                   type="text"
                   inputMode="decimal"
-                  placeholder="pl. 3.85"
+                  placeholder="pl. 3,85"
                   value={hoursStr}
                   onChange={(e) => setHoursStr(e.target.value)}
                   className="text-center text-lg"
                 />
               </div>
-              <Button
-                className="w-full"
-                onClick={() => setStep(1)}
-                disabled={hoursPerDay <= 0}
-              >
-                Tovább
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setStep(0)} className="flex-1">
+                  Vissza
+                </Button>
+                <Button
+                  className="flex-1"
+                  onClick={() => setStep(2)}
+                  disabled={hoursPerDay <= 0}
+                >
+                  Tovább
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
 
-        {step === 1 && (
+        {step === 2 && (
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Mennyi a bruttó illetményed?</CardTitle>
@@ -141,12 +186,11 @@ export function OnboardingForm() {
               {illetmeny > 0 && hoursPerDay > 0 && (
                 <div className="text-center text-sm text-muted-foreground space-y-0.5">
                   <p>Órabér: <strong className="text-foreground">{fmt(orabér)} Ft</strong></p>
-                  <p>FTE: <strong className="text-foreground">{fmt(Math.round(illetmeny / (hoursPerDay / 8)))} Ft</strong></p>
                 </div>
               )}
 
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setStep(0)} className="flex-1">
+                <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
                   Vissza
                 </Button>
                 <Button
@@ -163,7 +207,7 @@ export function OnboardingForm() {
 
         {/* Step indicator */}
         <div className="flex justify-center gap-2">
-          {[0, 1].map((s) => (
+          {[0, 1, 2].map((s) => (
             <div
               key={s}
               className={`h-1.5 rounded-full transition-all ${

@@ -25,6 +25,7 @@ interface Props {
   hoursPerDay: number;
   selectedBer: number;
   periods: SettingsPeriod[];
+  birthDate: string | null;
 }
 
 export function SettingsContent({
@@ -32,6 +33,7 @@ export function SettingsContent({
   hoursPerDay: initHours,
   selectedBer: initBer,
   periods: initPeriods,
+  birthDate: initBirthDate,
 }: Props) {
   const [illetmenyStr, setIlletmenyStr] = useState(String(initIlletmeny));
   const [hoursStr, setHoursStr] = useState(String(initHours));
@@ -306,6 +308,9 @@ export function SettingsContent({
           <CardTitle className="text-sm">Profil</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Születési dátum */}
+          <BirthDateSection initialDate={initBirthDate} />
+          <Separator />
           {/* Jelszó változtatás */}
           <ChangePasswordSection />
           <Separator />
@@ -313,6 +318,54 @@ export function SettingsContent({
           <DeleteAccountSection />
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function BirthDateSection({ initialDate }: { initialDate: string | null }) {
+  const [date, setDate] = useState(initialDate ?? "");
+  const [pending, startTransition] = useTransition();
+
+  const save = (val: string) => {
+    startTransition(async () => {
+      const fd = new FormData();
+      fd.set("birthDate", val);
+      // Need to pass current settings too since updateSettings expects them
+      // Use a dedicated action instead
+      const { updateBirthDate } = await import("@/actions/settings-actions");
+      const result = await updateBirthDate(val);
+      if (result?.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Születési dátum mentve");
+      }
+    });
+  };
+
+  const age = date ? Math.floor((Date.now() - new Date(date).getTime()) / (365.25 * 86400000)) : 0;
+
+  return (
+    <div className="space-y-2">
+      <Label className="text-xs">Születési dátum</Label>
+      <Input
+        type="date"
+        value={date}
+        onChange={(e) => {
+          setDate(e.target.value);
+          if (e.target.value) save(e.target.value);
+        }}
+        className="text-sm"
+        max={new Date().toISOString().split("T")[0]}
+      />
+      {date && (
+        <p className="text-xs text-muted-foreground">
+          {age < 25 ? (
+            <span className="text-green-600 font-medium">✓ {age} éves — SZJA kedvezmény automatikusan számolva</span>
+          ) : (
+            <span>{age} éves — SZJA kedvezmény nem jár</span>
+          )}
+        </p>
+      )}
     </div>
   );
 }

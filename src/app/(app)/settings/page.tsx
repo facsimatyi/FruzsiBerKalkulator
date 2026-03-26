@@ -18,6 +18,7 @@ export default async function SettingsPage() {
       hoursPerDay={Number(settings?.hoursPerDay ?? 6)}
       selectedBer={settings?.selectedBer ?? -1}
       periods={periods}
+      birthDate={settings?.birthDate ?? null}
     />
   );
 }

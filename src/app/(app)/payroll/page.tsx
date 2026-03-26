@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getAllShiftsForCalc, getSettingsForMonth, getKedvezmeny } from "@/lib/queries";
+import { getAllShiftsForCalc, getSettingsForMonth, getKedvezmeny, getUserSettings } from "@/lib/queries";
 import { calcMonthData, calcSzja, defaultKedv } from "@/lib/calculations/payroll";
 import { getHolidays } from "@/lib/calculations/holidays";
 import { PayrollContent } from "@/components/payroll/payroll-content";
@@ -21,14 +21,16 @@ export default async function PayrollPage({ searchParams }: Props) {
   const prevM = month === 0 ? 11 : month - 1;
   const prevY = month === 0 ? year - 1 : year;
 
-  const [thisSettings, prevSettings, allShifts, kedvDb] = await Promise.all([
+  const [thisSettings, prevSettings, allShifts, kedvDb, settings] = await Promise.all([
     getSettingsForMonth(session.user.id, year, month),
     getSettingsForMonth(session.user.id, prevY, prevM),
     getAllShiftsForCalc(session.user.id, year),
     getKedvezmeny(session.user.id, year, month),
+    getUserSettings(session.user.id),
   ]);
 
-  const thisKedv = kedvDb ?? defaultKedv(year, month);
+  const birthDate = settings?.birthDate ?? null;
+  const thisKedv = kedvDb ?? defaultKedv(year, month, birthDate);
 
   // Holidays
   const prevHol = getHolidays(prevY);

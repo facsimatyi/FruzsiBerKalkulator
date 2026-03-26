@@ -1,0 +1,1 @@
+ALTER TABLE "user_settings" ADD COLUMN "birth_date" varchar(10);

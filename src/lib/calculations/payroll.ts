@@ -200,8 +200,22 @@ export function calcSzja(
   return Math.round((brutto - cap) * 0.15);
 }
 
-export function defaultKedv(y: number, m: number): boolean {
-  return y < 2026 || (y === 2026 && m <= 1);
+/**
+ * Determine if 25-under tax benefit applies for a given month.
+ * If birthDate is provided: benefit applies until the month they turn 25 (inclusive).
+ * If no birthDate: no benefit (safe default, user can override per-month via kedvezmeny_map).
+ */
+export function defaultKedv(y: number, m: number, birthDate?: string | null): boolean {
+  if (!birthDate) return false;
+  // birthDate = "YYYY-MM-DD"
+  const [by, bm] = birthDate.split("-").map(Number);
+  // Turns 25 in year by+25, month bm-1 (0-indexed)
+  const turns25Year = by + 25;
+  const turns25Month = bm - 1; // convert to 0-indexed
+  // Benefit applies UNTIL the month they turn 25 (inclusive that month)
+  const targetVal = y * 12 + m;
+  const turns25Val = turns25Year * 12 + turns25Month;
+  return targetVal <= turns25Val;
 }
 
 export function getHolidaysForRange(year: number): Set<string> {

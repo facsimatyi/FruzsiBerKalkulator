@@ -18,19 +18,38 @@ export async function updateSettings(formData: FormData) {
   const illetmeny = parseNum(formData.get("illetmeny"));
   const hoursPerDay = parseNum(formData.get("hoursPerDay"));
   const selectedBer = parseNum(formData.get("selectedBer"));
+  const birthDate = (formData.get("birthDate") as string) || undefined;
 
   if (isNaN(illetmeny) || isNaN(hoursPerDay) || isNaN(selectedBer)) {
     return { error: "Érvénytelen adatok" };
   }
 
+  const updateData: Record<string, unknown> = {
+    illetmeny,
+    hoursPerDay: String(hoursPerDay),
+    selectedBer,
+    updatedAt: new Date(),
+  };
+  if (birthDate) updateData.birthDate = birthDate;
+
   await db
     .update(userSettings)
-    .set({
-      illetmeny,
-      hoursPerDay: String(hoursPerDay),
-      selectedBer,
-      updatedAt: new Date(),
-    })
+    .set(updateData)
+    .where(eq(userSettings.userId, session.user.id));
+
+  revalidatePath("/settings");
+  revalidatePath("/dashboard");
+  revalidatePath("/payroll");
+  return { success: true };
+}
+
+export async function updateBirthDate(birthDate: string) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Nem vagy bejelentkezve" };
+
+  await db
+    .update(userSettings)
+    .set({ birthDate, updatedAt: new Date() })
     .where(eq(userSettings.userId, session.user.id));
 
   revalidatePath("/settings");

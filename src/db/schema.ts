@@ -30,6 +30,7 @@ export const userSettings = pgTable("user_settings", {
     .notNull()
     .default("6"),
   selectedBer: integer("selected_ber").notNull().default(-1),
+  birthDate: varchar("birth_date", { length: 10 }), // YYYY-MM-DD, nullable
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
