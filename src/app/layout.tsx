@@ -19,6 +19,10 @@ export const metadata: Metadata = {
     title: "Bérkalkulátor",
   },
   icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
     apple: "/apple-touch-icon.png",
   },
 };
