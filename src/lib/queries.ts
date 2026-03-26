@@ -51,7 +51,24 @@ export async function getSettingsForMonth(
     };
   }
 
-  // Fallback to user_settings
+  // No period found for this month — try the earliest period as fallback
+  // (for months before the first defined period)
+  const [earliest] = await db
+    .select()
+    .from(settingsPeriods)
+    .where(eq(settingsPeriods.userId, userId))
+    .orderBy(sql`${settingsPeriods.effectiveYear} * 12 + ${settingsPeriods.effectiveMonth}`)
+    .limit(1);
+
+  if (earliest) {
+    return {
+      illetmeny: earliest.illetmeny,
+      hoursPerDay: Number(earliest.hoursPerDay),
+      selectedBer: earliest.selectedBer,
+    };
+  }
+
+  // No periods at all — fallback to user_settings
   const settings = await getUserSettings(userId);
   return {
     illetmeny: settings?.illetmeny ?? 457500,
