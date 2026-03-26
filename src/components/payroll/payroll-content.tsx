@@ -45,11 +45,6 @@ interface Props {
   thisTb: number;
   thisSzja: number;
   thisNetto: number;
-  nextBrutto: number;
-  nextTb: number;
-  nextSzja: number;
-  nextNetto: number;
-  nextMonth: number;
 }
 
 export function PayrollContent({
@@ -62,11 +57,6 @@ export function PayrollContent({
   thisTb,
   thisSzja,
   thisNetto,
-  nextBrutto,
-  nextTb,
-  nextSzja,
-  nextNetto,
-  nextMonth,
 }: Props) {
   const prevM = month === 0 ? 11 : month - 1;
 
@@ -195,28 +185,6 @@ export function PayrollContent({
         </CardContent>
       </Card>
 
-      {/* Köv. hó becslés */}
-      <Card className="border-dashed">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">
-            Köv. hó becslés — {MFULL[nextMonth]}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-1">
-          <Row label="Bruttó" value={`${fmt(nextBrutto)} Ft`} />
-          <Row label="TB (18,5%)" value={`−${fmt(nextTb)} Ft`} danger />
-          {nextSzja > 0 && (
-            <Row label="SZJA" value={`−${fmt(nextSzja)} Ft`} danger />
-          )}
-          <Separator className="my-2" />
-          <Row
-            label="Becsült nettó"
-            value={`${fmt(nextNetto)} Ft`}
-            bold
-            success
-          />
-        </CardContent>
-      </Card>
     </div>
   );
 }
