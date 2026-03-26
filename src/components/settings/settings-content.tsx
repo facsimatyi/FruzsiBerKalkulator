@@ -15,9 +15,15 @@ import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import type { SettingsPeriod } from "@/db/schema";
 
-/** Parse number from string, handling Hungarian comma decimal separator */
+/** Parse number from string, handling Hungarian comma decimal separator and spaces */
 function parseNum(s: string): number {
-  return Number(s.replace(",", ".")) || 0;
+  return Number(s.replace(/\s/g, "").replace(",", ".")) || 0;
+}
+
+/** Format number with space thousands separator (Hungarian style) */
+function fmtInput(n: number): string {
+  if (n === 0) return "";
+  return n.toLocaleString("hu-HU").replace(/,/g, " ");
 }
 
 interface Props {
@@ -35,7 +41,7 @@ export function SettingsContent({
   periods: initPeriods,
   birthDate: initBirthDate,
 }: Props) {
-  const [illetmenyStr, setIlletmenyStr] = useState(String(initIlletmeny));
+  const [illetmenyStr, setIlletmenyStr] = useState(initIlletmeny > 0 ? fmtInput(initIlletmeny) : "");
   const [hoursStr, setHoursStr] = useState(String(initHours));
   const [selectedBer, setSelectedBer] = useState(initBer);
   const illetmeny = parseNum(illetmenyStr);
@@ -44,7 +50,7 @@ export function SettingsContent({
   const [showAddPeriod, setShowAddPeriod] = useState(false);
   const [newYear, setNewYear] = useState(new Date().getFullYear());
   const [newMonth, setNewMonth] = useState(new Date().getMonth());
-  const [newIlletmenyStr, setNewIlletmenyStr] = useState(String(initIlletmeny));
+  const [newIlletmenyStr, setNewIlletmenyStr] = useState(initIlletmeny > 0 ? fmtInput(initIlletmeny) : "");
   const [newHoursStr, setNewHoursStr] = useState(String(initHours));
   const newIlletmeny = parseNum(newIlletmenyStr);
   const newHours = parseNum(newHoursStr);
@@ -111,7 +117,7 @@ export function SettingsContent({
               setSelectedBer(i);
               if (i >= 0) {
                 const newIl = Math.round(BERTABLA[i].min * (hoursPerDay / 8));
-                setIlletmenyStr(String(newIl));
+                setIlletmenyStr(fmtInput(newIl));
                 save(newIl, hoursPerDay, i);
               }
             }}
@@ -143,7 +149,15 @@ export function SettingsContent({
                   setIlletmenyStr(e.target.value);
                   setSelectedBer(-1);
                 }}
-                onBlur={() => { if (illetmeny > 0) save(illetmeny, hoursPerDay, -1); }}
+                onBlur={() => {
+                  if (illetmeny > 0) {
+                    setIlletmenyStr(fmtInput(illetmeny));
+                    save(illetmeny, hoursPerDay, -1);
+                  }
+                }}
+                onFocus={(e) => {
+                  if (illetmeny > 0) setIlletmenyStr(String(illetmeny));
+                }}
                 className="text-sm tabular-nums"
               />
             </div>
@@ -232,6 +246,8 @@ export function SettingsContent({
                     inputMode="numeric"
                     value={newIlletmenyStr}
                     onChange={(e) => setNewIlletmenyStr(e.target.value)}
+                    onBlur={() => { if (newIlletmeny > 0) setNewIlletmenyStr(fmtInput(newIlletmeny)); }}
+                    onFocus={() => { if (newIlletmeny > 0) setNewIlletmenyStr(String(newIlletmeny)); }}
                     className="text-sm"
                   />
                 </div>

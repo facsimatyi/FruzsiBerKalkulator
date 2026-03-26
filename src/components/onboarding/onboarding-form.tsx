@@ -19,7 +19,8 @@ export function OnboardingForm() {
   const [selectedBer, setSelectedBer] = useState(-1);
   const [pending, startTransition] = useTransition();
 
-  const parseNum = (s: string) => Number(s.replace(",", ".")) || 0;
+  const parseNum = (s: string) => Number(s.replace(/\s/g, "").replace(",", ".")) || 0;
+  const fmtInput = (n: number) => n > 0 ? n.toLocaleString("hu-HU").replace(/,/g, " ") : "";
   const illetmeny = parseNum(illetmenyStr);
   const hoursPerDay = parseNum(hoursStr);
   const orabér = hoursPerDay > 0 ? illetmeny / ((174 * hoursPerDay) / 8) : 0;
@@ -155,7 +156,7 @@ export function OnboardingForm() {
                     const i = +e.target.value;
                     setSelectedBer(i);
                     if (i >= 0) {
-                      setIlletmenyStr(String(Math.round(BERTABLA[i].min * (hoursPerDay / 8))));
+                      setIlletmenyStr(fmtInput(Math.round(BERTABLA[i].min * (hoursPerDay / 8))));
                     }
                   }}
                   className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
@@ -173,12 +174,14 @@ export function OnboardingForm() {
                 <Input
                   type="text"
                   inputMode="numeric"
-                  placeholder="pl. 293563"
+                  placeholder="pl. 293 563"
                   value={illetmenyStr}
                   onChange={(e) => {
                     setIlletmenyStr(e.target.value);
                     setSelectedBer(-1);
                   }}
+                  onBlur={() => { if (illetmeny > 0) setIlletmenyStr(fmtInput(illetmeny)); }}
+                  onFocus={() => { if (illetmeny > 0) setIlletmenyStr(String(illetmeny)); }}
                   className="text-center text-lg"
                 />
               </div>
