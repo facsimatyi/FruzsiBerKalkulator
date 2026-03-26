@@ -101,31 +101,35 @@ export function calcMonthData(
   let pihenoH = 0;
   let behivasH = 0;
   let tuloraH = 0;
-  let cumAll = 0;
+  // cumRegular: only regular hours count toward kötelező fulfillment.
+  // Ünnep/pihenő/behívás are "always rendkívüli" — excluded from kötelező calc.
+  let cumRegular = 0;
 
   for (const seg of segments) {
     totalH += seg.fraction;
-    cumAll += seg.fraction;
 
     // Napszak pótlék: EVERY hour gets napszak classification
     // (including holiday/pihenő hours — they stack in OMSZ)
     napszakH[seg.napszak] += seg.fraction;
 
     // Rendkívüli pótlékok:
-    // Ünnepnap: ALL hours on a public holiday → 150% (automatic)
-    // Pihenőnap/Hétvége: manually flagged shifts → 100%
-    // Behívás: manually flagged → 200%
-    // Túlóra: remaining hours beyond kötelező → 150%
+    // Ünnepnap: ALL hours on a public holiday → 150% (always rendkívüli)
+    // Pihenőnap/Hétvége: manually flagged shifts → 100% (always rendkívüli)
+    // Behívás: manually flagged → 200% (always rendkívüli)
+    // Túlóra: regular hours beyond kötelező → 150%
     if (seg.unnep) {
       unnepH += seg.fraction;
     } else if (seg.piheno) {
       pihenoH += seg.fraction;
     } else if (seg.behivas) {
       behivasH += seg.fraction;
-    } else if (cumAll > kotelesOrak) {
-      // Only regular (non-ünnep, non-pihenő, non-behívás) hours count toward overtime
-      const overPart = Math.min(seg.fraction, cumAll - kotelesOrak);
-      tuloraH += overPart;
+    } else {
+      // Regular hour — counts toward kötelező
+      cumRegular += seg.fraction;
+      if (cumRegular > kotelesOrak) {
+        const overPart = Math.min(seg.fraction, cumRegular - kotelesOrak);
+        tuloraH += overPart;
+      }
     }
   }
 

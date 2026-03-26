@@ -1,6 +1,6 @@
-import { eq, and, gte, lt, or } from "drizzle-orm";
+import { eq, and, gte, lt, or, lte, desc, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { shifts, userSettings, kedvezmenyMap } from "@/db/schema";
+import { shifts, userSettings, kedvezmenyMap, settingsPeriods } from "@/db/schema";
 import type { ShiftData } from "@/lib/calculations/constants";
 
 export async function getUserSettings(userId: string) {
@@ -10,6 +10,65 @@ export async function getUserSettings(userId: string) {
     .where(eq(userSettings.userId, userId))
     .limit(1);
   return settings;
+}
+
+/**
+ * Get the effective settings for a specific month.
+ * Finds the most recent settings_periods row where (effective_year, effective_month) <= (year, month).
+ * Falls back to user_settings if no period exists.
+ */
+export async function getSettingsForMonth(
+  userId: string,
+  year: number,
+  month: number
+): Promise<{ illetmeny: number; hoursPerDay: number; selectedBer: number }> {
+  // Find the most recent period that's on or before the target month
+  // effective_year * 12 + effective_month <= year * 12 + month
+  const targetVal = year * 12 + month;
+
+  const [period] = await db
+    .select()
+    .from(settingsPeriods)
+    .where(
+      and(
+        eq(settingsPeriods.userId, userId),
+        lte(
+          sql`${settingsPeriods.effectiveYear} * 12 + ${settingsPeriods.effectiveMonth}`,
+          targetVal
+        )
+      )
+    )
+    .orderBy(
+      desc(sql`${settingsPeriods.effectiveYear} * 12 + ${settingsPeriods.effectiveMonth}`)
+    )
+    .limit(1);
+
+  if (period) {
+    return {
+      illetmeny: period.illetmeny,
+      hoursPerDay: Number(period.hoursPerDay),
+      selectedBer: period.selectedBer,
+    };
+  }
+
+  // Fallback to user_settings
+  const settings = await getUserSettings(userId);
+  return {
+    illetmeny: settings?.illetmeny ?? 457500,
+    hoursPerDay: Number(settings?.hoursPerDay ?? 6),
+    selectedBer: settings?.selectedBer ?? -1,
+  };
+}
+
+/**
+ * Get all settings periods for a user (for the settings UI).
+ */
+export async function getSettingsPeriods(userId: string) {
+  return db
+    .select()
+    .from(settingsPeriods)
+    .where(eq(settingsPeriods.userId, userId))
+    .orderBy(desc(settingsPeriods.effectiveYear), desc(settingsPeriods.effectiveMonth));
 }
 
 export async function getMonthShifts(

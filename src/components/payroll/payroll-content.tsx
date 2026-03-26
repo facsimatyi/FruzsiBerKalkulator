@@ -38,7 +38,6 @@ function Row({ label, value, bold, danger, success, sub }: RowProps) {
 interface Props {
   year: number;
   month: number;
-  calc: MonthCalcResult;
   prevCalc: MonthCalcResult;
   illetmeny: number;
   thisKedv: boolean;
@@ -56,7 +55,6 @@ interface Props {
 export function PayrollContent({
   year,
   month,
-  calc,
   prevCalc,
   illetmeny,
   thisKedv,
@@ -76,99 +74,98 @@ export function PayrollContent({
     <div className="space-y-4">
       <MonthSelector />
 
-      {/* Pótlék bontás */}
-      <Card>
-        <CardHeader className="pb-2">
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-sm">Pótlék bontás</CardTitle>
-            <span className="text-sm font-semibold tabular-nums">
-              {fmt(calc.potlekTotal)} Ft
-            </span>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Napszak (minden órára)
-          </p>
-          <Row
-            label="Normál 06–14"
-            value={`${calc.napszakH.normal.toFixed(1)}h`}
-            sub
-          />
-          <Row
-            label="Délutáni 14–22 (20%)"
-            value={`${calc.napszakH.delutan.toFixed(1)}h → ${fmt(calc.delutanPotlek)} Ft`}
-            sub
-          />
-          <Row
-            label="Éjszakai 22–06 (50%)"
-            value={`${calc.napszakH.ejszaka.toFixed(1)}h → ${fmt(calc.ejszakaPotlek)} Ft`}
-            sub
-          />
-          <Row
-            label="Napszak pótlék"
-            value={`${fmt(calc.napszakTotal)} Ft`}
-            bold
-          />
+      {/* Nettó hero */}
+      <div className="text-center space-y-1">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {year}. {MFULL[month]} — bérszám
+        </p>
+        <p className="text-4xl font-bold tracking-tight tabular-nums">
+          {fmt(thisNetto)}{" "}
+          <span className="text-lg font-medium text-muted-foreground">Ft</span>
+        </p>
+      </div>
 
-          <Separator className="my-2" />
-
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Rendkívüli (ráadásul)
-          </p>
-          <Row
-            label="Ünnepnap (+150%)"
-            value={`${calc.unnepH.toFixed(1)}h → ${fmt(calc.unnepPotlek)} Ft`}
-            sub
-          />
-          <Row
-            label="Hétvége (+100%)"
-            value={`${calc.hetvegeH.toFixed(1)}h → ${fmt(calc.hetvegePotlek)} Ft`}
-            sub
-          />
-          <Row
-            label="Pihenőnap (+100%)"
-            value={`${calc.pihenoH.toFixed(1)}h → ${fmt(calc.pihenoPotlek)} Ft`}
-            sub
-          />
-          <Row
-            label="Túlóra (+150%)"
-            value={`${calc.tuloraH.toFixed(1)}h → ${fmt(calc.tuloraPotlek)} Ft`}
-            sub
-          />
-          <Row
-            label="Behívás (+200%)"
-            value={`${calc.behivasH.toFixed(1)}h → ${fmt(calc.behivasPotlek)} Ft`}
-            sub
-          />
-          <Row
-            label="Rendkívüli pótlék"
-            value={`${fmt(calc.rendkivuliTotal)} Ft`}
-            bold
-          />
-
-          <Separator className="my-2" />
-          <Row
-            label="Összes pótlék"
-            value={`${fmt(calc.potlekTotal)} Ft`}
-            bold
-          />
-        </CardContent>
-      </Card>
-
-      {/* Bérszámfejtés */}
+      {/* Bérszámfejtés: illetmény + előző havi pótlékok */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm">Bérszámfejtés</CardTitle>
         </CardHeader>
         <CardContent className="space-y-1">
           <Row label="Illetmény" value={`${fmt(illetmeny)} Ft`} />
-          <Row
-            label={`Előző havi pótlékok (${MHU[prevM]})`}
-            value={`${fmt(prevCalc.potlekTotal)} Ft`}
-          />
-          <Row label="Bruttó" value={`${fmt(thisBrutto)} Ft`} bold />
+
           <Separator className="my-2" />
+
+          {/* Előző havi pótlékok bontása */}
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground pb-1">
+            {MFULL[prevM]}i pótlékok (csúsztatva)
+          </p>
+
+          {prevCalc.delutanPotlek > 0 && (
+            <Row
+              label={`Délutáni 20% (${prevCalc.napszakH.delutan.toFixed(1)}h)`}
+              value={`${fmt(prevCalc.delutanPotlek)} Ft`}
+              sub
+            />
+          )}
+          {prevCalc.ejszakaPotlek > 0 && (
+            <Row
+              label={`Éjszakai 50% (${prevCalc.napszakH.ejszaka.toFixed(1)}h)`}
+              value={`${fmt(prevCalc.ejszakaPotlek)} Ft`}
+              sub
+            />
+          )}
+          {prevCalc.unnepPotlek > 0 && (
+            <Row
+              label={`Ünnepnap 150% (${prevCalc.unnepH.toFixed(1)}h)`}
+              value={`${fmt(prevCalc.unnepPotlek)} Ft`}
+              sub
+            />
+          )}
+          {prevCalc.tuloraPotlek > 0 && (
+            <Row
+              label={`Túlóra 150% (${prevCalc.tuloraH.toFixed(1)}h)`}
+              value={`${fmt(prevCalc.tuloraPotlek)} Ft`}
+              sub
+            />
+          )}
+          {prevCalc.hetvegePotlek > 0 && (
+            <Row
+              label={`Hétvége 100% (${prevCalc.hetvegeH.toFixed(1)}h)`}
+              value={`${fmt(prevCalc.hetvegePotlek)} Ft`}
+              sub
+            />
+          )}
+          {prevCalc.pihenoPotlek > 0 && (
+            <Row
+              label={`Pihenőnap 100% (${prevCalc.pihenoH.toFixed(1)}h)`}
+              value={`${fmt(prevCalc.pihenoPotlek)} Ft`}
+              sub
+            />
+          )}
+          {prevCalc.behivasPotlek > 0 && (
+            <Row
+              label={`Behívás 200% (${prevCalc.behivasH.toFixed(1)}h)`}
+              value={`${fmt(prevCalc.behivasPotlek)} Ft`}
+              sub
+            />
+          )}
+
+          <Row
+            label={`Pótlékok összesen`}
+            value={`${fmt(prevCalc.potlekTotal)} Ft`}
+            bold
+          />
+
+          <Separator className="my-2" />
+
+          <Row label="Bruttó" value={`${fmt(thisBrutto)} Ft`} bold />
+
+          <Separator className="my-2" />
+
+          {/* Levonások */}
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground pb-1">
+            Levonások
+          </p>
           <Row
             label="TB illetményre (18,5%)"
             value={`−${fmt(Math.round(illetmeny * 0.185))} Ft`}
@@ -183,7 +180,7 @@ export function PayrollContent({
             label={
               thisKedv
                 ? thisSzja === 0
-                  ? "SZJA (kedvezményes)"
+                  ? "SZJA (25 alatti kedv.)"
                   : "SZJA plafon felett"
                 : "SZJA (15%)"
             }
@@ -191,22 +188,21 @@ export function PayrollContent({
             danger={thisSzja > 0}
             success={thisSzja === 0}
           />
+
           <Separator className="my-2" />
+
           <Row label="Nettó" value={`${fmt(thisNetto)} Ft`} bold success />
         </CardContent>
       </Card>
 
       {/* Köv. hó becslés */}
-      <Card>
+      <Card className="border-dashed">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm">
             Köv. hó becslés — {MFULL[nextMonth]}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-1">
-          <p className="text-xs text-muted-foreground mb-2">
-            {MFULL[month]}i pótlékok csúsztatva → {fmt(calc.potlekTotal)} Ft
-          </p>
           <Row label="Bruttó" value={`${fmt(nextBrutto)} Ft`} />
           <Row label="TB (18,5%)" value={`−${fmt(nextTb)} Ft`} danger />
           {nextSzja > 0 && (
@@ -219,9 +215,6 @@ export function PayrollContent({
             bold
             success
           />
-          <p className="text-[10px] text-muted-foreground mt-2">
-            Teljes havi illetménnyel, hiányzás nélkül
-          </p>
         </CardContent>
       </Card>
     </div>

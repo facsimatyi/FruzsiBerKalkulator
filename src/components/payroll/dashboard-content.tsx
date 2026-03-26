@@ -2,9 +2,8 @@
 
 import { MonthSelector } from "@/components/shared/month-selector";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { MFULL, fmt, type MonthCalcResult } from "@/lib/calculations/constants";
-import { Clock, TrendingUp, Wallet, DollarSign } from "lucide-react";
+import { Clock, TrendingUp, Wallet, DollarSign, ArrowRight } from "lucide-react";
 import { toggleKedvezmeny } from "@/actions/kedvezmeny-actions";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +17,10 @@ interface Props {
   thisSzja: number;
   thisKedv: boolean;
   progressPct: number;
+  nextNetto: number;
+  nextBrutto: number;
+  nextMonth: number;
+  nextYear: number;
 }
 
 export function DashboardContent({
@@ -30,6 +33,10 @@ export function DashboardContent({
   thisSzja,
   thisKedv,
   progressPct,
+  nextNetto,
+  nextBrutto,
+  nextMonth,
+  nextYear,
 }: Props) {
   return (
     <div className="space-y-6">
@@ -38,7 +45,7 @@ export function DashboardContent({
       {/* Hero: Nettó */}
       <div className="text-center space-y-1">
         <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Várható nettó
+          {year}. {MFULL[month]} — várható nettó
         </p>
         <p className="text-4xl font-bold tracking-tight tabular-nums">
           {fmt(thisNetto)}{" "}
@@ -75,6 +82,33 @@ export function DashboardContent({
           Teljes SZJA
         </button>
       </div>
+
+      {/* Next month estimate */}
+      <Card className="border-dashed">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <ArrowRight className="h-3.5 w-3.5" />
+                <span className="text-xs font-medium">
+                  Köv. hó becslés — {MFULL[nextMonth]}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {MFULL[month]}i pótlékok csúsztatva
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-xl font-bold tabular-nums">
+                {fmt(nextNetto)} <span className="text-xs font-medium text-muted-foreground">Ft</span>
+              </p>
+              <p className="text-xs text-muted-foreground">
+                bruttó {fmt(nextBrutto)}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Progress bar */}
       <div className="space-y-1.5">

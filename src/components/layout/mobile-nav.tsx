@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Clock, Calculator, Settings } from "lucide-react";
+import { LayoutDashboard, Clock, Calculator, Coins, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { href: "/dashboard", label: "Főoldal", icon: LayoutDashboard },
   { href: "/shifts", label: "Műszakok", icon: Clock },
-  { href: "/payroll", label: "Bér", icon: Calculator },
-  { href: "/settings", label: "Beállítások", icon: Settings },
+  { href: "/payroll", label: "Bérszám", icon: Calculator },
+  { href: "/potlekok", label: "Pótlékok", icon: Coins },
+  { href: "/settings", label: "Beáll.", icon: Settings },
 ];
 
 export function MobileNav() {

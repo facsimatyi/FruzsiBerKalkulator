@@ -69,6 +69,29 @@ export const kedvezmenyMap = pgTable(
   ]
 );
 
+export const settingsPeriods = pgTable(
+  "settings_periods",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    effectiveYear: integer("effective_year").notNull(),
+    effectiveMonth: integer("effective_month").notNull(), // 0-indexed
+    illetmeny: integer("illetmeny").notNull(),
+    hoursPerDay: numeric("hours_per_day", { precision: 4, scale: 2 }).notNull(),
+    selectedBer: integer("selected_ber").notNull().default(-1),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    unique("uq_settings_period_user_year_month").on(
+      table.userId,
+      table.effectiveYear,
+      table.effectiveMonth
+    ),
+  ]
+);
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -76,3 +99,4 @@ export type UserSettings = typeof userSettings.$inferSelect;
 export type Shift = typeof shifts.$inferSelect;
 export type NewShift = typeof shifts.$inferInsert;
 export type KedvezmenyEntry = typeof kedvezmenyMap.$inferSelect;
+export type SettingsPeriod = typeof settingsPeriods.$inferSelect;
