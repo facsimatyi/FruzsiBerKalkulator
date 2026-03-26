@@ -45,7 +45,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="hu" className={`${geist.variable} h-full antialiased`} suppressHydrationWarning>
-      <body className="min-h-full flex flex-col font-[family-name:var(--font-geist-sans)]">
+      <body className="min-h-full flex flex-col font-[family-name:var(--font-geist-sans)]" suppressHydrationWarning>
         <Providers>
           {children}
           <Toaster position="top-center" richColors />
