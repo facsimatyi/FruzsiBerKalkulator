@@ -68,13 +68,13 @@ export function MonthSelector() {
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <div className="flex gap-0.5 flex-1 justify-center overflow-hidden">
+        <div className="flex gap-0.5 flex-1 overflow-x-auto scrollbar-none">
           {MHU.map((m, i) => (
             <button
               key={i}
               onClick={() => go(year, i)}
               className={cn(
-                "px-1.5 py-1 min-w-[32px] text-[11px] rounded-md transition-colors",
+                "px-1.5 py-1 min-w-[28px] text-[11px] rounded-md transition-colors shrink-0",
                 i === month
                   ? "bg-primary/10 text-primary font-bold"
                   : "text-muted-foreground hover:text-foreground"

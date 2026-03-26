@@ -93,7 +93,10 @@ export function calcMonthData(
     }
   }
 
-  // Accumulate hours
+  // Two-pass calculation:
+  // Pass 1: Accumulate napszak + categorize hours
+  // Pass 2: Calculate behívás/túlóra based on month-end totals (not chronological)
+
   let totalH = 0;
   const napszakH = { normal: 0, delutan: 0, ejszaka: 0 };
   let unnepH = 0;
@@ -101,41 +104,52 @@ export function calcMonthData(
   let pihenoH = 0;
   let behivasH = 0;
   let tuloraH = 0;
-  // cumRegular: only regular hours count toward kötelező fulfillment.
-  // Ünnep/pihenő/behívás are "always rendkívüli" — excluded from kötelező calc.
-  let cumRegular = 0;
+
+  // Pass 1: count all hours by category
+  let totalRegularH = 0; // non-ünnep, non-pihenő, non-behívás
+  let totalBehivasH = 0; // behívás hours (pending 200% decision)
 
   for (const seg of segments) {
     totalH += seg.fraction;
 
     // Napszak pótlék: EVERY hour gets napszak classification
-    // (including holiday/pihenő hours — they stack in OMSZ)
     napszakH[seg.napszak] += seg.fraction;
 
-    // Rendkívüli pótlékok:
-    // Ünnepnap: ALL hours on a public holiday → 150% (always rendkívüli)
-    // Pihenőnap/Hétvége: manually flagged shifts → 100% (always rendkívüli)
-    // Behívás: only the portion ABOVE kötelező gets 200%
-    //   - if kötelező not yet met: behívás hours count toward kötelező (no extra)
-    //   - if kötelező already met: full behívás hours get 200%
-    //   - if kötelező met mid-behívás: split accordingly
-    // Túlóra: regular hours beyond kötelező → 150%
+    // Categorize
     if (seg.unnep) {
       unnepH += seg.fraction;
     } else if (seg.piheno) {
       pihenoH += seg.fraction;
+    } else if (seg.behivas) {
+      totalBehivasH += seg.fraction;
     } else {
-      // Regular or behívás hour — counts toward kötelező
-      cumRegular += seg.fraction;
-      if (cumRegular > kotelesOrak) {
-        const overPart = Math.min(seg.fraction, cumRegular - kotelesOrak);
-        if (seg.behivas) {
-          behivasH += overPart;
-        } else {
-          tuloraH += overPart;
-        }
-      }
+      totalRegularH += seg.fraction;
     }
+  }
+
+  // Pass 2: Calculate behívás and túlóra based on month-end totals
+  // OMSZ logic: check if regular hours meet kötelező at month end,
+  // then determine behívás 200% and túlóra 150% accordingly.
+  //
+  // If regular >= kötelező: ALL behívás → 200%, regular overflow → 150% túlóra
+  // If regular < kötelező: behívás fills gap first (no 200%), rest → 200%
+  //   And no regular túlóra in this case.
+
+  if (totalRegularH >= kotelesOrak) {
+    // Regular hours already cover kötelező
+    // → ALL behívás hours get 200%
+    // → Regular hours above kötelező get 150% túlóra
+    behivasH = totalBehivasH;
+    tuloraH = totalRegularH - kotelesOrak;
+  } else {
+    // Regular hours don't cover kötelező
+    // → Behívás first fills the gap (no 200% for that portion)
+    // → Remaining behívás above kötelező gets 200%
+    const gap = kotelesOrak - totalRegularH;
+    if (totalBehivasH > gap) {
+      behivasH = totalBehivasH - gap;
+    }
+    // No túlóra — regular hours are under kötelező
   }
 
   const delutanPotlek = Math.round(orabér * 0.2 * napszakH.delutan);
