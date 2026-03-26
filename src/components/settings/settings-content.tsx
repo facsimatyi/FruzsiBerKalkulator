@@ -25,15 +25,19 @@ export function SettingsContent({
   selectedBer: initBer,
   periods: initPeriods,
 }: Props) {
-  const [illetmeny, setIlletmeny] = useState(initIlletmeny);
-  const [hoursPerDay, setHoursPerDay] = useState(initHours);
+  const [illetmenyStr, setIlletmenyStr] = useState(String(initIlletmeny));
+  const [hoursStr, setHoursStr] = useState(String(initHours));
   const [selectedBer, setSelectedBer] = useState(initBer);
+  const illetmeny = Number(illetmenyStr) || 0;
+  const hoursPerDay = Number(hoursStr) || 0;
   const [pending, startTransition] = useTransition();
   const [showAddPeriod, setShowAddPeriod] = useState(false);
   const [newYear, setNewYear] = useState(new Date().getFullYear());
   const [newMonth, setNewMonth] = useState(new Date().getMonth());
-  const [newIlletmeny, setNewIlletmeny] = useState(initIlletmeny);
-  const [newHours, setNewHours] = useState(initHours);
+  const [newIlletmenyStr, setNewIlletmenyStr] = useState(String(initIlletmeny));
+  const [newHoursStr, setNewHoursStr] = useState(String(initHours));
+  const newIlletmeny = Number(newIlletmenyStr) || 0;
+  const newHours = Number(newHoursStr) || 0;
 
   const orabér = illetmeny / ((174 * hoursPerDay) / 8);
 
@@ -97,7 +101,7 @@ export function SettingsContent({
               setSelectedBer(i);
               if (i >= 0) {
                 const newIl = Math.round(BERTABLA[i].min * (hoursPerDay / 8));
-                setIlletmeny(newIl);
+                setIlletmenyStr(String(newIl));
                 save(newIl, hoursPerDay, i);
               }
             }}
@@ -122,25 +126,25 @@ export function SettingsContent({
             <div className="space-y-1.5">
               <Label className="text-xs">Bruttó illetmény (Ft)</Label>
               <Input
-                type="number"
-                value={illetmeny}
+                type="text"
+                inputMode="numeric"
+                value={illetmenyStr}
                 onChange={(e) => {
-                  const v = +e.target.value;
-                  setIlletmeny(v);
+                  setIlletmenyStr(e.target.value);
                   setSelectedBer(-1);
                 }}
-                onBlur={() => save(illetmeny, hoursPerDay, -1)}
+                onBlur={() => { if (illetmeny > 0) save(illetmeny, hoursPerDay, -1); }}
                 className="text-sm tabular-nums"
               />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">Napi óra</Label>
               <Input
-                type="number"
-                step="0.5"
-                value={hoursPerDay}
-                onChange={(e) => setHoursPerDay(+e.target.value)}
-                onBlur={() => save(illetmeny, hoursPerDay, selectedBer)}
+                type="text"
+                inputMode="decimal"
+                value={hoursStr}
+                onChange={(e) => setHoursStr(e.target.value)}
+                onBlur={() => { if (hoursPerDay > 0) save(illetmeny, hoursPerDay, selectedBer); }}
                 className="text-sm tabular-nums"
               />
             </div>
@@ -214,19 +218,20 @@ export function SettingsContent({
                 <div className="space-y-1">
                   <Label className="text-xs">Illetmény (Ft)</Label>
                   <Input
-                    type="number"
-                    value={newIlletmeny}
-                    onChange={(e) => setNewIlletmeny(+e.target.value)}
+                    type="text"
+                    inputMode="numeric"
+                    value={newIlletmenyStr}
+                    onChange={(e) => setNewIlletmenyStr(e.target.value)}
                     className="text-sm"
                   />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">Napi óra</Label>
                   <Input
-                    type="number"
-                    step="0.5"
-                    value={newHours}
-                    onChange={(e) => setNewHours(+e.target.value)}
+                    type="text"
+                    inputMode="decimal"
+                    value={newHoursStr}
+                    onChange={(e) => setNewHoursStr(e.target.value)}
                     className="text-sm"
                   />
                 </div>

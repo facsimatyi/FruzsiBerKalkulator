@@ -1,8 +1,10 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { getUserSettings } from "@/lib/queries";
 import { AppHeader } from "@/components/layout/app-header";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { DesktopSidebar } from "@/components/layout/desktop-sidebar";
+import { OnboardingForm } from "@/components/onboarding/onboarding-form";
 
 export default async function AppLayout({
   children,
@@ -10,7 +12,14 @@ export default async function AppLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
-  if (!session) redirect("/login");
+  if (!session?.user?.id) redirect("/login");
+
+  const settings = await getUserSettings(session.user.id);
+  const needsOnboarding = !settings || settings.illetmeny === 0;
+
+  if (needsOnboarding) {
+    return <OnboardingForm />;
+  }
 
   return (
     <div className="flex flex-col h-screen">

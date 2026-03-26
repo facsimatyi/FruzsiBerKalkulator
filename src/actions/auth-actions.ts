@@ -42,7 +42,8 @@ export async function registerUser(_prevState: unknown, formData: FormData) {
     .values({ email, passwordHash, name })
     .returning({ id: users.id });
 
-  await db.insert(userSettings).values({ userId: newUser.id });
+  // Create settings with illetmeny=0 to trigger onboarding
+  await db.insert(userSettings).values({ userId: newUser.id, illetmeny: 0, hoursPerDay: "0" });
 
   return { success: true };
 }
