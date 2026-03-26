@@ -115,20 +115,25 @@ export function calcMonthData(
     // Rendkívüli pótlékok:
     // Ünnepnap: ALL hours on a public holiday → 150% (always rendkívüli)
     // Pihenőnap/Hétvége: manually flagged shifts → 100% (always rendkívüli)
-    // Behívás: manually flagged → 200% (always rendkívüli)
+    // Behívás: only the portion ABOVE kötelező gets 200%
+    //   - if kötelező not yet met: behívás hours count toward kötelező (no extra)
+    //   - if kötelező already met: full behívás hours get 200%
+    //   - if kötelező met mid-behívás: split accordingly
     // Túlóra: regular hours beyond kötelező → 150%
     if (seg.unnep) {
       unnepH += seg.fraction;
     } else if (seg.piheno) {
       pihenoH += seg.fraction;
-    } else if (seg.behivas) {
-      behivasH += seg.fraction;
     } else {
-      // Regular hour — counts toward kötelező
+      // Regular or behívás hour — counts toward kötelező
       cumRegular += seg.fraction;
       if (cumRegular > kotelesOrak) {
         const overPart = Math.min(seg.fraction, cumRegular - kotelesOrak);
-        tuloraH += overPart;
+        if (seg.behivas) {
+          behivasH += overPart;
+        } else {
+          tuloraH += overPart;
+        }
       }
     }
   }

@@ -21,20 +21,15 @@ export default async function DashboardPage({ searchParams }: Props) {
   const prevM = month === 0 ? 11 : month - 1;
   const prevY = month === 0 ? year - 1 : year;
   const nextM = (month + 1) % 12;
-  const nextY = month === 11 ? year + 1 : year;
 
-  const [thisSettings, prevSettings, nextSettings, allShifts, kedvDb, nextKedvDb] =
-    await Promise.all([
-      getSettingsForMonth(session.user.id, year, month),
-      getSettingsForMonth(session.user.id, prevY, prevM),
-      getSettingsForMonth(session.user.id, nextY, nextM),
-      getAllShiftsForCalc(session.user.id, year),
-      getKedvezmeny(session.user.id, year, month),
-      getKedvezmeny(session.user.id, nextY, nextM),
-    ]);
+  const [thisSettings, prevSettings, allShifts, kedvDb] = await Promise.all([
+    getSettingsForMonth(session.user.id, year, month),
+    getSettingsForMonth(session.user.id, prevY, prevM),
+    getAllShiftsForCalc(session.user.id, year),
+    getKedvezmeny(session.user.id, year, month),
+  ]);
 
   const thisKedv = kedvDb ?? defaultKedv(year, month);
-  const nextKedv = nextKedvDb ?? defaultKedv(nextY, nextM);
 
   // Holidays
   const holidays = getHolidays(year);
@@ -53,13 +48,6 @@ export default async function DashboardPage({ searchParams }: Props) {
   const thisSzja = calcSzja(thisBrutto, year, thisKedv);
   const thisNetto = thisBrutto - thisTb - thisSzja;
 
-  // Next month estimate: next month illetmény + this month pótlékok
-  const nextIlletmeny = nextSettings.illetmeny;
-  const nextBrutto = nextIlletmeny + calc.potlekTotal;
-  const nextTb = Math.round(nextBrutto * 0.185);
-  const nextSzja = calcSzja(nextBrutto, nextY, nextKedv);
-  const nextNetto = nextBrutto - nextTb - nextSzja;
-
   const progressPct = calc.kotelesOrak > 0 ? Math.min(100, (calc.totalH / calc.kotelesOrak) * 100) : 0;
 
   return (
@@ -73,10 +61,7 @@ export default async function DashboardPage({ searchParams }: Props) {
       thisSzja={thisSzja}
       thisKedv={thisKedv}
       progressPct={progressPct}
-      nextNetto={nextNetto}
-      nextBrutto={nextBrutto}
       nextMonth={nextM}
-      nextYear={nextY}
     />
   );
 }
