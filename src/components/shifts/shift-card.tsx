@@ -7,8 +7,12 @@ import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 import { DN } from "@/lib/calculations/constants";
-import { dateStr } from "@/lib/calculations/holidays";
 import type { ShiftData } from "@/lib/calculations/constants";
+
+/** UTC version of dateStr for client-side use (shift data is stored as UTC) */
+function dateStrUTC(d: Date): string {
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+}
 
 interface Props {
   shift: ShiftData;
@@ -20,10 +24,13 @@ export function ShiftCard({ shift, holidays }: Props) {
   const s = new Date(shift.start);
   const e = new Date(shift.end);
   const hours = (e.getTime() - s.getTime()) / 3600000;
-  const isHol = holidays.has(dateStr(s));
-  const dayName = DN[s.getDay()];
-  const endDayName = DN[e.getDay()];
-  const sameDay = s.toDateString() === e.toDateString();
+  const isHol = holidays.has(dateStrUTC(s));
+  const dayName = DN[s.getUTCDay()];
+  const endDayName = DN[e.getUTCDay()];
+  const sameDay =
+    s.getUTCFullYear() === e.getUTCFullYear() &&
+    s.getUTCMonth() === e.getUTCMonth() &&
+    s.getUTCDate() === e.getUTCDate();
   const pad = (n: number) => String(n).padStart(2, "0");
 
   return (
@@ -40,7 +47,7 @@ export function ShiftCard({ shift, holidays }: Props) {
             : "bg-muted"
         }`}
       >
-        <span className="text-base font-bold">{s.getDate()}</span>
+        <span className="text-base font-bold">{s.getUTCDate()}</span>
         <span className="text-[10px]">{dayName}</span>
       </div>
 
@@ -48,9 +55,9 @@ export function ShiftCard({ shift, holidays }: Props) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm font-medium">
-            {pad(s.getHours())}:{pad(s.getMinutes())} →{" "}
+            {pad(s.getUTCHours())}:{pad(s.getUTCMinutes())} →{" "}
             {!sameDay ? `${endDayName} ` : ""}
-            {pad(e.getHours())}:{pad(e.getMinutes())}
+            {pad(e.getUTCHours())}:{pad(e.getUTCMinutes())}
           </span>
           <span className="text-xs text-muted-foreground font-medium">
             {hours.toFixed(0)}h
