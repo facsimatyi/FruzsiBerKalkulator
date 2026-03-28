@@ -101,13 +101,13 @@ export function ShiftForm({ year, month, onSuccess }: Props) {
         </div>
 
         {/* Quick duration */}
-        <div className="flex gap-2">
-          {[10, 12, 16, 24].map((h) => (
+        <div className="flex flex-wrap gap-2">
+          {[4, 6, 8, 10, 12, 14, 16, 18, 24].map((h) => (
             <Button
               key={h}
               variant="outline"
               size="sm"
-              className="flex-1 text-xs"
+              className="flex-1 min-w-[3rem] text-xs"
               onClick={() => setDuration(h)}
             >
               {h}h
