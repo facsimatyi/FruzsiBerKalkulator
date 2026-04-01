@@ -21,26 +21,10 @@ export function ShiftForm({ year, month, onSuccess }: Props) {
   const dim = new Date(year, month + 1, 0).getDate();
   const day = Math.min(now.getDate(), dim);
 
-  const [startDate, setStartDate] = useState(`${year}-${pad(month + 1)}-${pad(day)}`);
-  const [startHour, setStartHour] = useState("08:00");
-  const [endDate, setEndDate] = useState("");
-  const [endHour, setEndHour] = useState("");
-
-  // Combine date+time into datetime-local format for calculations
-  const startTime = startDate && startHour ? `${startDate}T${startHour}` : "";
-  const endTime = endDate && endHour ? `${endDate}T${endHour}` : "";
-
-  const setStartTime = (v: string) => {
-    const [d, t] = v.split("T");
-    setStartDate(d || "");
-    setStartHour(t || "08:00");
-  };
-  const setEndTime = (v: string) => {
-    if (!v) { setEndDate(""); setEndHour(""); return; }
-    const [d, t] = v.split("T");
-    setEndDate(d || "");
-    setEndHour(t || "");
-  };
+  const [startTime, setStartTime] = useState(
+    `${year}-${pad(month + 1)}-${pad(day)}T08:00`
+  );
+  const [endTime, setEndTime] = useState("");
   const [isBehivas, setIsBehivas] = useState(false);
   const [isPihenonap, setIsPihenonap] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -92,48 +76,28 @@ export function ShiftForm({ year, month, onSuccess }: Props) {
   return (
     <Card>
       <CardContent className="p-4 space-y-4">
-        {/* Kezdés */}
-        <div className="space-y-1.5">
-          <Label className="text-xs">Kezdés</Label>
-          <div className="grid grid-cols-2 gap-2">
-            <Input
-              type="date"
-              value={startDate}
+        <div className="space-y-3">
+          <div className="space-y-1.5">
+            <Label className="text-xs">Kezdés</Label>
+            <input
+              type="datetime-local"
+              value={startTime}
               onChange={(e) => {
-                setStartDate(e.target.value);
-                setEndDate("");
-                setEndHour("");
+                setStartTime(e.target.value);
+                setEndTime("");
               }}
-              className="text-sm"
-            />
-            <Input
-              type="time"
-              value={startHour}
-              onChange={(e) => {
-                setStartHour(e.target.value);
-                setEndDate("");
-                setEndHour("");
-              }}
-              className="text-sm"
+              className="block w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm h-8 outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&::-webkit-datetime-edit]:w-full [&::-webkit-calendar-picker-indicator]:opacity-50"
+              style={{ maxWidth: "100%", boxSizing: "border-box" }}
             />
           </div>
-        </div>
-
-        {/* Vége */}
-        <div className="space-y-1.5">
-          <Label className="text-xs">Vége</Label>
-          <div className="grid grid-cols-2 gap-2">
-            <Input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="text-sm"
-            />
-            <Input
-              type="time"
-              value={endHour}
-              onChange={(e) => setEndHour(e.target.value)}
-              className="text-sm"
+          <div className="space-y-1.5">
+            <Label className="text-xs">Vége</Label>
+            <input
+              type="datetime-local"
+              value={endTime}
+              onChange={(e) => setEndTime(e.target.value)}
+              className="block w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm h-8 outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&::-webkit-datetime-edit]:w-full [&::-webkit-calendar-picker-indicator]:opacity-50"
+              style={{ maxWidth: "100%", boxSizing: "border-box" }}
             />
           </div>
         </div>
