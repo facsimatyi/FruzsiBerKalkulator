@@ -79,25 +79,23 @@ export function ShiftForm({ year, month, onSuccess }: Props) {
         <div className="space-y-3">
           <div className="space-y-1.5">
             <Label className="text-xs">Kezdés</Label>
-            <input
+            <Input
               type="datetime-local"
               value={startTime}
               onChange={(e) => {
                 setStartTime(e.target.value);
                 setEndTime("");
               }}
-              className="block w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm h-8 outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&::-webkit-datetime-edit]:w-full [&::-webkit-calendar-picker-indicator]:opacity-50"
-              style={{ maxWidth: "100%", boxSizing: "border-box" }}
+              className="text-sm"
             />
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs">Vége</Label>
-            <input
+            <Input
               type="datetime-local"
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
-              className="block w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm h-8 outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 [&::-webkit-datetime-edit]:w-full [&::-webkit-calendar-picker-indicator]:opacity-50"
-              style={{ maxWidth: "100%", boxSizing: "border-box" }}
+              className="text-sm"
             />
           </div>
         </div>

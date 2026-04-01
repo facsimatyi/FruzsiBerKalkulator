@@ -137,3 +137,23 @@
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
+
+/* Fix iOS Safari datetime-local input overflow */
+input[type="datetime-local"],
+input[type="date"],
+input[type="time"] {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+}
+
+input[type="datetime-local"]::-webkit-datetime-edit,
+input[type="datetime-local"]::-webkit-datetime-edit-fields-wrapper,
+input[type="datetime-local"]::-webkit-datetime-edit-text,
+input[type="datetime-local"]::-webkit-datetime-edit-minute-field,
+input[type="datetime-local"]::-webkit-datetime-edit-hour-field,
+input[type="datetime-local"]::-webkit-datetime-edit-day-field,
+input[type="datetime-local"]::-webkit-datetime-edit-month-field,
+input[type="datetime-local"]::-webkit-datetime-edit-year-field {
+  padding: 0;
+}
