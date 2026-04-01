@@ -21,10 +21,26 @@ export function ShiftForm({ year, month, onSuccess }: Props) {
   const dim = new Date(year, month + 1, 0).getDate();
   const day = Math.min(now.getDate(), dim);
 
-  const [startTime, setStartTime] = useState(
-    `${year}-${pad(month + 1)}-${pad(day)}T08:00`
-  );
-  const [endTime, setEndTime] = useState("");
+  const [startDate, setStartDate] = useState(`${year}-${pad(month + 1)}-${pad(day)}`);
+  const [startHour, setStartHour] = useState("08:00");
+  const [endDate, setEndDate] = useState("");
+  const [endHour, setEndHour] = useState("");
+
+  // Combine date+time into datetime-local format for calculations
+  const startTime = startDate && startHour ? `${startDate}T${startHour}` : "";
+  const endTime = endDate && endHour ? `${endDate}T${endHour}` : "";
+
+  const setStartTime = (v: string) => {
+    const [d, t] = v.split("T");
+    setStartDate(d || "");
+    setStartHour(t || "08:00");
+  };
+  const setEndTime = (v: string) => {
+    if (!v) { setEndDate(""); setEndHour(""); return; }
+    const [d, t] = v.split("T");
+    setEndDate(d || "");
+    setEndHour(t || "");
+  };
   const [isBehivas, setIsBehivas] = useState(false);
   const [isPihenonap, setIsPihenonap] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -74,28 +90,50 @@ export function ShiftForm({ year, month, onSuccess }: Props) {
   };
 
   return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-4 space-y-4 overflow-hidden">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 overflow-hidden">
-          <div className="space-y-1.5 min-w-0">
-            <Label className="text-xs">Kezdés</Label>
+    <Card>
+      <CardContent className="p-4 space-y-4">
+        {/* Kezdés */}
+        <div className="space-y-1.5">
+          <Label className="text-xs">Kezdés</Label>
+          <div className="grid grid-cols-2 gap-2">
             <Input
-              type="datetime-local"
-              value={startTime}
+              type="date"
+              value={startDate}
               onChange={(e) => {
-                setStartTime(e.target.value);
-                setEndTime("");
+                setStartDate(e.target.value);
+                setEndDate("");
+                setEndHour("");
               }}
-              className="text-sm w-full min-w-0 max-w-full"
+              className="text-sm"
+            />
+            <Input
+              type="time"
+              value={startHour}
+              onChange={(e) => {
+                setStartHour(e.target.value);
+                setEndDate("");
+                setEndHour("");
+              }}
+              className="text-sm"
             />
           </div>
-          <div className="space-y-1.5 min-w-0">
-            <Label className="text-xs">Vége</Label>
+        </div>
+
+        {/* Vége */}
+        <div className="space-y-1.5">
+          <Label className="text-xs">Vége</Label>
+          <div className="grid grid-cols-2 gap-2">
             <Input
-              type="datetime-local"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-              className="text-sm w-full min-w-0 max-w-full"
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="text-sm"
+            />
+            <Input
+              type="time"
+              value={endHour}
+              onChange={(e) => setEndHour(e.target.value)}
+              className="text-sm"
             />
           </div>
         </div>
