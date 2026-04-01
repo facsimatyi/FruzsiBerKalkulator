@@ -1,0 +1,1 @@
+ALTER TABLE "shifts" DROP COLUMN "is_pihenonap";

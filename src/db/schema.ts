@@ -44,7 +44,6 @@ export const shifts = pgTable(
     startTime: timestamp("start_time", { withTimezone: true }).notNull(),
     endTime: timestamp("end_time", { withTimezone: true }).notNull(),
     isBehivas: boolean("is_behivas").notNull().default(false),
-    isPihenonap: boolean("is_pihenonap").notNull().default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [index("idx_shifts_user_month").on(table.userId, table.startTime)]
