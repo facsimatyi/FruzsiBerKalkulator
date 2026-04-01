@@ -77,7 +77,7 @@ export function ShiftForm({ year, month, onSuccess }: Props) {
     <Card>
       <CardContent className="p-4 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 min-w-0">
             <Label className="text-xs">Kezdés</Label>
             <Input
               type="datetime-local"
@@ -86,16 +86,16 @@ export function ShiftForm({ year, month, onSuccess }: Props) {
                 setStartTime(e.target.value);
                 setEndTime("");
               }}
-              className="text-sm"
+              className="text-sm w-full min-w-0"
             />
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 min-w-0">
             <Label className="text-xs">Vége</Label>
             <Input
               type="datetime-local"
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
-              className="text-sm"
+              className="text-sm w-full min-w-0"
             />
           </div>
         </div>
