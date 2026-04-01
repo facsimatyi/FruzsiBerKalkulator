@@ -33,8 +33,8 @@ export function OnboardingForm() {
   const age = birthYear ? new Date().getFullYear() - birthYear : 0;
 
   const handleSave = () => {
-    if (illetmeny <= 0 || hoursPerDay <= 0) {
-      toast.error("Kérlek add meg az illetményt és az óraszámot");
+    if (!birthDate || illetmeny <= 0 || hoursPerDay <= 0) {
+      toast.error("Kérlek add meg az összes adatot");
       return;
     }
     startTransition(async () => {
@@ -73,7 +73,7 @@ export function OnboardingForm() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-xs text-muted-foreground">
-                A 25 év alatti SZJA kedvezmény automatikus számításához
+                A 25 év alatti SZJA kedvezmény automatikus számításához (kötelező)
               </p>
               <Input
                 type="date"
@@ -94,8 +94,9 @@ export function OnboardingForm() {
               <Button
                 className="w-full"
                 onClick={() => setStep(1)}
+                disabled={!birthDate}
               >
-                {birthDate ? "Tovább" : "Kihagyom"}
+                Tovább
               </Button>
             </CardContent>
           </Card>

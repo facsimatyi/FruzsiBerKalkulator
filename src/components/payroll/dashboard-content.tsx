@@ -4,7 +4,6 @@ import { MonthSelector } from "@/components/shared/month-selector";
 import { Card, CardContent } from "@/components/ui/card";
 import { MFULL, fmt, fmtH, type MonthCalcResult } from "@/lib/calculations/constants";
 import { Clock, TrendingUp, Wallet, DollarSign } from "lucide-react";
-import { toggleKedvezmeny } from "@/actions/kedvezmeny-actions";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -49,32 +48,9 @@ export function DashboardContent({
           {MFULL[month]}i bérszám • bruttó {fmt(thisBrutto)} • TB −{fmt(thisTb)}
           {thisSzja > 0 ? ` • SZJA −${fmt(thisSzja)}` : ""}
         </p>
-      </div>
-
-      {/* SZJA toggle */}
-      <div className="flex gap-2 justify-center">
-        <button
-          onClick={() => toggleKedvezmeny(year, month, true)}
-          className={cn(
-            "px-3 py-1.5 text-xs font-medium rounded-full transition-colors",
-            thisKedv
-              ? "bg-primary/10 text-primary"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          25 alatti kedv.
-        </button>
-        <button
-          onClick={() => toggleKedvezmeny(year, month, false)}
-          className={cn(
-            "px-3 py-1.5 text-xs font-medium rounded-full transition-colors",
-            !thisKedv
-              ? "bg-destructive/10 text-destructive"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
-          Teljes SZJA
-        </button>
+        <p className="text-[10px] text-muted-foreground">
+          {thisKedv ? "25 alatti SZJA kedvezmény aktív" : "Teljes SZJA (15%)"}
+        </p>
       </div>
 
       {/* Progress bar */}
@@ -114,6 +90,11 @@ export function DashboardContent({
           />
         </div>
       </div>
+
+      {/* Section header */}
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {MFULL[month]} műszak adatai
+      </p>
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 gap-3">
