@@ -31,6 +31,33 @@ export async function createShift(formData: FormData) {
   return { success: true };
 }
 
+export async function updateShift(shiftId: string, formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Nem vagy bejelentkezve" };
+
+  const startTime = formData.get("startTime") as string;
+  const endTime = formData.get("endTime") as string;
+  const isBehivas = formData.get("isBehivas") === "true";
+
+  if (!startTime || !endTime || new Date(endTime) <= new Date(startTime)) {
+    return { error: "Érvénytelen időpontok" };
+  }
+
+  await db
+    .update(shifts)
+    .set({
+      startTime: new Date(startTime),
+      endTime: new Date(endTime),
+      isBehivas,
+    })
+    .where(and(eq(shifts.id, shiftId), eq(shifts.userId, session.user.id)));
+
+  revalidatePath("/shifts");
+  revalidatePath("/dashboard");
+  revalidatePath("/payroll");
+  return { success: true };
+}
+
 export async function deleteShift(shiftId: string) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Nem vagy bejelentkezve" };

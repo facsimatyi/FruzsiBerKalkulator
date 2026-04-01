@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import { deleteShift } from "@/actions/shift-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { DN } from "@/lib/calculations/constants";
 import type { ShiftData } from "@/lib/calculations/constants";
@@ -14,20 +14,35 @@ function dateStrUTC(d: Date): string {
   return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
 }
 
+/** Count holiday hours in a shift */
+function countHolidayHoursUTC(s: Date, e: Date, holidays: Set<string>): number {
+  let hours = 0;
+  let cur = new Date(s.getTime());
+  while (cur < e) {
+    const next = new Date(Math.min(cur.getTime() + 3600000, e.getTime()));
+    const frac = (next.getTime() - cur.getTime()) / 3600000;
+    if (holidays.has(dateStrUTC(cur))) hours += frac;
+    cur = next;
+  }
+  return hours;
+}
+
 interface Props {
   shift: ShiftData;
   holidays: Set<string>;
   clippedH?: number;
+  onEdit?: (shift: ShiftData) => void;
 }
 
-export function ShiftCard({ shift, holidays, clippedH }: Props) {
+export function ShiftCard({ shift, holidays, clippedH, onEdit }: Props) {
   const [pending, startTransition] = useTransition();
   const s = new Date(shift.start);
   const e = new Date(shift.end);
   const fullHours = (e.getTime() - s.getTime()) / 3600000;
   const hours = clippedH ?? fullHours;
   const isClipped = clippedH !== undefined && Math.abs(clippedH - fullHours) > 0.01;
-  const isHol = holidays.has(dateStrUTC(s));
+  const holidayH = countHolidayHoursUTC(s, e, holidays);
+  const hasHoliday = holidayH > 0;
   const dayName = DN[s.getUTCDay()];
   const endDayName = DN[e.getUTCDay()];
   const sameDay =
@@ -43,7 +58,7 @@ export function ShiftCard({ shift, holidays, clippedH }: Props) {
         className={`w-10 h-10 rounded-lg flex flex-col items-center justify-center shrink-0 text-xs font-semibold leading-tight ${
           shift.behivas
             ? "bg-destructive/10 text-destructive"
-            : isHol
+            : hasHoliday
             ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
             : "bg-muted"
         }`}
@@ -52,8 +67,11 @@ export function ShiftCard({ shift, holidays, clippedH }: Props) {
         <span className="text-[10px]">{dayName}</span>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 min-w-0">
+      {/* Content — tappable for edit */}
+      <div
+        className="flex-1 min-w-0 cursor-pointer"
+        onClick={() => onEdit?.(shift)}
+      >
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm font-medium">
             {pad(s.getUTCHours())}:{pad(s.getUTCMinutes())} →{" "}
@@ -70,32 +88,44 @@ export function ShiftCard({ shift, holidays, clippedH }: Props) {
               BEHÍVÁS
             </Badge>
           )}
-          {isHol && !shift.behivas && (
+          {hasHoliday && (
             <Badge
               variant="outline"
               className="text-[10px] h-5 border-amber-300 text-amber-700 dark:text-amber-400"
             >
-              ÜNNEP
+              ÜNNEP {holidayH < fullHours ? `${holidayH.toFixed(holidayH % 1 === 0 ? 0 : 1)}h` : ""}
             </Badge>
           )}
         </div>
       </div>
 
-      {/* Delete */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
-        disabled={pending}
-        onClick={() =>
-          startTransition(async () => {
-            await deleteShift(shift.id);
-            toast.success("Műszak törölve");
-          })
-        }
-      >
-        <X className="h-4 w-4" />
-      </Button>
+      {/* Edit + Delete */}
+      <div className="flex gap-1 shrink-0">
+        {onEdit && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 text-muted-foreground hover:text-primary"
+            onClick={() => onEdit(shift)}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
+        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+          disabled={pending}
+          onClick={() =>
+            startTransition(async () => {
+              await deleteShift(shift.id);
+              toast.success("Műszak törölve");
+            })
+          }
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }

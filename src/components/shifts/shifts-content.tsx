@@ -19,6 +19,7 @@ interface Props {
 
 export function ShiftsContent({ year, month, shifts, holidays }: Props) {
   const [showForm, setShowForm] = useState(false);
+  const [editingShift, setEditingShift] = useState<ShiftData | null>(null);
   const [pending, startTransition] = useTransition();
   const holidaySet = new Set(holidays);
 
@@ -34,6 +35,16 @@ export function ShiftsContent({ year, month, shifts, holidays }: Props) {
 
   const totalH = shifts.reduce((sum, s) => sum + clippedHours(s), 0);
 
+  const handleEdit = (shift: ShiftData) => {
+    setEditingShift(shift);
+    setShowForm(false);
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setEditingShift(null);
+  };
+
   return (
     <div className="space-y-4">
       <MonthSelector />
@@ -47,10 +58,16 @@ export function ShiftsContent({ year, month, shifts, holidays }: Props) {
         </div>
         <Button
           size="sm"
-          onClick={() => setShowForm(!showForm)}
-          variant={showForm ? "outline" : "default"}
+          onClick={() => {
+            if (showForm || editingShift) {
+              handleFormClose();
+            } else {
+              setShowForm(true);
+            }
+          }}
+          variant={showForm || editingShift ? "outline" : "default"}
         >
-          {showForm ? (
+          {showForm || editingShift ? (
             "Mégsem"
           ) : (
             <>
@@ -60,11 +77,24 @@ export function ShiftsContent({ year, month, shifts, holidays }: Props) {
         </Button>
       </div>
 
+      {/* Add form */}
       {showForm && (
         <ShiftForm
           year={year}
           month={month}
-          onSuccess={() => setShowForm(false)}
+          holidays={holidays}
+          onSuccess={handleFormClose}
+        />
+      )}
+
+      {/* Edit form */}
+      {editingShift && (
+        <ShiftForm
+          year={year}
+          month={month}
+          holidays={holidays}
+          onSuccess={handleFormClose}
+          editShift={editingShift}
         />
       )}
 
@@ -78,7 +108,13 @@ export function ShiftsContent({ year, month, shifts, holidays }: Props) {
       ) : (
         <div className="space-y-2">
           {shifts.map((shift) => (
-            <ShiftCard key={shift.id} shift={shift} holidays={holidaySet} clippedH={clippedHours(shift)} />
+            <ShiftCard
+              key={shift.id}
+              shift={shift}
+              holidays={holidaySet}
+              clippedH={clippedHours(shift)}
+              onEdit={handleEdit}
+            />
           ))}
           <Button
             variant="ghost"

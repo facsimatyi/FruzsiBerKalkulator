@@ -1,32 +1,64 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { createShift } from "@/actions/shift-actions";
+import { useState, useTransition, useMemo } from "react";
+import { createShift, updateShift } from "@/actions/shift-actions";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
+import type { ShiftData } from "@/lib/calculations/constants";
 
 interface Props {
   year: number;
   month: number;
+  holidays?: string[];
   onSuccess: () => void;
+  editShift?: ShiftData;
 }
 
-export function ShiftForm({ year, month, onSuccess }: Props) {
+/** Count how many hours of a shift fall on holiday dates */
+function countHolidayHours(
+  startStr: string,
+  endStr: string,
+  holidaySet: Set<string>
+): number {
+  const s = new Date(startStr);
+  const e = new Date(endStr);
+  if (isNaN(s.getTime()) || isNaN(e.getTime()) || e <= s) return 0;
+
+  let hours = 0;
+  let cur = new Date(s.getTime());
+  while (cur < e) {
+    const next = new Date(Math.min(cur.getTime() + 3600000, e.getTime()));
+    const frac = (next.getTime() - cur.getTime()) / 3600000;
+    const ds = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}-${String(cur.getDate()).padStart(2, "0")}`;
+    if (holidaySet.has(ds)) hours += frac;
+    cur = next;
+  }
+  return hours;
+}
+
+export function ShiftForm({ year, month, holidays = [], onSuccess, editShift }: Props) {
   const pad = (n: number) => String(n).padStart(2, "0");
   const now = new Date();
   const dim = new Date(year, month + 1, 0).getDate();
   const day = Math.min(now.getDate(), dim);
 
-  const [startTime, setStartTime] = useState(
-    `${year}-${pad(month + 1)}-${pad(day)}T08:00`
-  );
-  const [endTime, setEndTime] = useState("");
-  const [isBehivas, setIsBehivas] = useState(false);
+  const defaultStart = editShift
+    ? editShift.start.slice(0, 16)
+    : `${year}-${pad(month + 1)}-${pad(day)}T08:00`;
+
+  const defaultEnd = editShift
+    ? editShift.end.slice(0, 16)
+    : "";
+
+  const [startTime, setStartTime] = useState(defaultStart);
+  const [endTime, setEndTime] = useState(defaultEnd);
+  const [isBehivas, setIsBehivas] = useState(editShift?.behivas ?? false);
   const [pending, startTransition] = useTransition();
+
+  const holidaySet = useMemo(() => new Set(holidays), [holidays]);
 
   const setDuration = (h: number) => {
     if (!startTime) return;
@@ -45,6 +77,8 @@ export function ShiftForm({ year, month, onSuccess }: Props) {
     ? (new Date(endTime).getTime() - new Date(startTime).getTime()) / 3600000
     : 0;
 
+  const holidayHours = isValid ? countHolidayHours(startTime, endTime, holidaySet) : 0;
+
   const handleSubmit = () => {
     if (!isValid) return;
     startTransition(async () => {
@@ -52,19 +86,24 @@ export function ShiftForm({ year, month, onSuccess }: Props) {
       fd.set("startTime", startTime);
       fd.set("endTime", endTime);
       fd.set("isBehivas", String(isBehivas));
-      const result = await createShift(fd);
+
+      const result = editShift
+        ? await updateShift(editShift.id, fd)
+        : await createShift(fd);
+
       if (result?.error) {
         toast.error(result.error);
       } else {
-        toast.success("Műszak hozzáadva");
-        // Reset for next shift (1 week later)
-        const nd = new Date(startTime);
-        nd.setDate(nd.getDate() + 7);
-        setStartTime(
-          `${nd.getFullYear()}-${pad(nd.getMonth() + 1)}-${pad(nd.getDate())}T08:00`
-        );
-        setEndTime("");
-        setIsBehivas(false);
+        toast.success(editShift ? "Műszak módosítva" : "Műszak hozzáadva");
+        if (!editShift) {
+          const nd = new Date(startTime);
+          nd.setDate(nd.getDate() + 7);
+          setStartTime(
+            `${nd.getFullYear()}-${pad(nd.getMonth() + 1)}-${pad(nd.getDate())}T08:00`
+          );
+          setEndTime("");
+          setIsBehivas(false);
+        }
         onSuccess();
       }
     });
@@ -119,6 +158,11 @@ export function ShiftForm({ year, month, onSuccess }: Props) {
         {isValid && (
           <p className="text-xs text-center text-muted-foreground">
             {hours.toFixed(1)} óra
+            {holidayHours > 0 && (
+              <span className="text-amber-600 dark:text-amber-400 font-medium">
+                {" "}— {holidayHours.toFixed(holidayHours % 1 === 0 ? 0 : 1)}h ünnep
+              </span>
+            )}
           </p>
         )}
 
@@ -137,7 +181,7 @@ export function ShiftForm({ year, month, onSuccess }: Props) {
           disabled={!isValid || pending}
           onClick={handleSubmit}
         >
-          {pending ? "Mentés..." : "Hozzáadás"}
+          {pending ? "Mentés..." : editShift ? "Mentés" : "Hozzáadás"}
         </Button>
       </CardContent>
     </Card>
