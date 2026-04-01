@@ -13,7 +13,6 @@ export async function createShift(formData: FormData) {
   const startTime = formData.get("startTime") as string;
   const endTime = formData.get("endTime") as string;
   const isBehivas = formData.get("isBehivas") === "true";
-  const isPihenonap = formData.get("isPihenonap") === "true";
 
   if (!startTime || !endTime || new Date(endTime) <= new Date(startTime)) {
     return { error: "Érvénytelen időpontok" };
@@ -24,7 +23,6 @@ export async function createShift(formData: FormData) {
     startTime: new Date(startTime),
     endTime: new Date(endTime),
     isBehivas,
-    isPihenonap,
   });
 
   revalidatePath("/shifts");
@@ -47,7 +45,7 @@ export async function deleteShift(shiftId: string) {
   return { success: true };
 }
 
-export async function toggleShiftProp(shiftId: string, prop: "isPihenonap" | "isBehivas") {
+export async function toggleShiftProp(shiftId: string, prop: "isBehivas") {
   const session = await auth();
   if (!session?.user?.id) return { error: "Nem vagy bejelentkezve" };
 

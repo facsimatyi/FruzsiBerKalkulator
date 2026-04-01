@@ -118,11 +118,6 @@ export function PotlekokContent({ year, month, calc, orabér }: Props) {
             sub
           />
           <Row
-            label="Pihenőnap (+100%)"
-            value={`${fmtH(calc.pihenoH)}h → ${fmt(calc.pihenoPotlek)} Ft`}
-            sub
-          />
-          <Row
             label="Túlóra (+150%)"
             value={`${fmtH(calc.tuloraH)}h → ${fmt(calc.tuloraPotlek)} Ft`}
             sub

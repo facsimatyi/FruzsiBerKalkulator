@@ -72,7 +72,6 @@ export function calcMonthData(
     napszak: "normal" | "delutan" | "ejszaka";
     unnep: boolean;
     hetvege: boolean;
-    piheno: boolean;
     behivas: boolean;
   }
 
@@ -101,10 +100,7 @@ export function calcMonthData(
         fraction: frac,
         napszak,
         unnep: isHolidayHour(holidayMap, ds, h),
-        // Hétvége is manual — set via isPihenonap on the shift
-        // (OMSZ assigns specific shifts as "hétvége", not all Sat/Sun hours)
         hetvege: false,
-        piheno: !!shift.piheno,
         behivas: !!shift.behivas,
       });
       cur = next;
@@ -119,7 +115,6 @@ export function calcMonthData(
   const napszakH = { normal: 0, delutan: 0, ejszaka: 0 };
   let unnepH = 0;
   let hetvegeH = 0;
-  let pihenoH = 0;
   let behivasH = 0;
   let tuloraH = 0;
 
@@ -135,14 +130,11 @@ export function calcMonthData(
 
     // Categorize
     // Ünnep: gets 100% pótlék BUT also counts toward kötelező fulfillment
-    // Pihenő: gets 100% pótlék, excluded from kötelező
     // Behívás: pending 200% decision based on month-end totals
     // Regular: counts toward kötelező
     if (seg.unnep) {
       unnepH += seg.fraction;
       totalRegularH += seg.fraction; // ünnep counts toward kötelező too
-    } else if (seg.piheno) {
-      pihenoH += seg.fraction;
     } else if (seg.behivas) {
       totalBehivasH += seg.fraction;
     } else {
@@ -179,12 +171,11 @@ export function calcMonthData(
   const ejszakaPotlek = Math.round(orabér * 0.5 * napszakH.ejszaka);
   const unnepPotlek = Math.round(orabér * 1.0 * unnepH);
   const hetvegePotlek = Math.round(orabér * 1.0 * hetvegeH);
-  const pihenoPotlek = Math.round(orabér * 1.0 * pihenoH);
   const tuloraPotlek = Math.round(orabér * 1.5 * tuloraH);
   const behivasPotlek = Math.round(orabér * 2.0 * behivasH);
   const napszakTotal = delutanPotlek + ejszakaPotlek;
   const rendkivuliTotal =
-    unnepPotlek + hetvegePotlek + pihenoPotlek + tuloraPotlek + behivasPotlek;
+    unnepPotlek + hetvegePotlek + tuloraPotlek + behivasPotlek;
   const potlekTotal = napszakTotal + rendkivuliTotal;
 
   return {
@@ -195,14 +186,12 @@ export function calcMonthData(
     napszakH,
     unnepH,
     hetvegeH,
-    pihenoH,
     behivasH,
     tuloraH,
     delutanPotlek,
     ejszakaPotlek,
     unnepPotlek,
     hetvegePotlek,
-    pihenoPotlek,
     tuloraPotlek,
     behivasPotlek,
     napszakTotal,

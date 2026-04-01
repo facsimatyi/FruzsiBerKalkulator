@@ -26,7 +26,6 @@ export function ShiftForm({ year, month, onSuccess }: Props) {
   );
   const [endTime, setEndTime] = useState("");
   const [isBehivas, setIsBehivas] = useState(false);
-  const [isPihenonap, setIsPihenonap] = useState(false);
   const [pending, startTransition] = useTransition();
 
   const setDuration = (h: number) => {
@@ -53,7 +52,6 @@ export function ShiftForm({ year, month, onSuccess }: Props) {
       fd.set("startTime", startTime);
       fd.set("endTime", endTime);
       fd.set("isBehivas", String(isBehivas));
-      fd.set("isPihenonap", String(isPihenonap));
       const result = await createShift(fd);
       if (result?.error) {
         toast.error(result.error);
@@ -67,7 +65,6 @@ export function ShiftForm({ year, month, onSuccess }: Props) {
         );
         setEndTime("");
         setIsBehivas(false);
-        setIsPihenonap(false);
         onSuccess();
       }
     });
@@ -129,22 +126,9 @@ export function ShiftForm({ year, month, onSuccess }: Props) {
           <div className="flex items-center gap-2">
             <Switch
               checked={isBehivas}
-              onCheckedChange={(v) => {
-                setIsBehivas(v);
-                if (v) setIsPihenonap(false);
-              }}
+              onCheckedChange={setIsBehivas}
             />
             <Label className="text-xs">Behívás</Label>
-          </div>
-          <div className="flex items-center gap-2">
-            <Switch
-              checked={isPihenonap}
-              onCheckedChange={(v) => {
-                setIsPihenonap(v);
-                if (v) setIsBehivas(false);
-              }}
-            />
-            <Label className="text-xs">Pihenőnap</Label>
           </div>
         </div>
 

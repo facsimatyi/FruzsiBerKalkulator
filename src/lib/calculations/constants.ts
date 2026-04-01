@@ -46,7 +46,6 @@ export interface ShiftData {
   start: string; // ISO datetime
   end: string;   // ISO datetime
   behivas: boolean;
-  piheno: boolean;
 }
 
 export interface MonthCalcResult {
@@ -57,14 +56,12 @@ export interface MonthCalcResult {
   napszakH: { normal: number; delutan: number; ejszaka: number };
   unnepH: number;
   hetvegeH: number;
-  pihenoH: number;
   behivasH: number;
   tuloraH: number;
   delutanPotlek: number;
   ejszakaPotlek: number;
   unnepPotlek: number;
   hetvegePotlek: number;
-  pihenoPotlek: number;
   tuloraPotlek: number;
   behivasPotlek: number;
   napszakTotal: number;

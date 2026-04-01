@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { deleteShift, toggleShiftProp } from "@/actions/shift-actions";
+import { deleteShift } from "@/actions/shift-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
@@ -45,8 +45,6 @@ export function ShiftCard({ shift, holidays, clippedH }: Props) {
             ? "bg-destructive/10 text-destructive"
             : isHol
             ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-            : shift.piheno
-            ? "bg-primary/10 text-primary"
             : "bg-muted"
         }`}
       >
@@ -79,33 +77,6 @@ export function ShiftCard({ shift, holidays, clippedH }: Props) {
             >
               ÜNNEP
             </Badge>
-          )}
-          {shift.piheno ? (
-            <Badge
-              variant="outline"
-              className="text-[10px] h-5 cursor-pointer border-primary/30 text-primary"
-              onClick={() =>
-                startTransition(async () => {
-                  await toggleShiftProp(shift.id, "isPihenonap");
-                })
-              }
-            >
-              PIHENŐ ✕
-            </Badge>
-          ) : (
-            !shift.behivas &&
-            !isHol && (
-              <button
-                className="text-[10px] px-2 h-5 rounded-full border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
-                onClick={() =>
-                  startTransition(async () => {
-                    await toggleShiftProp(shift.id, "isPihenonap");
-                  })
-                }
-              >
-                + pihenőnap
-              </button>
-            )
           )}
         </div>
       </div>

@@ -112,7 +112,6 @@ export async function getMonthShifts(
     start: r.startTime.toISOString(),
     end: r.endTime.toISOString(),
     behivas: r.isBehivas,
-    piheno: r.isPihenonap,
   }));
 }
 
@@ -141,7 +140,6 @@ export async function getAllShiftsForCalc(
     start: r.startTime.toISOString(),
     end: r.endTime.toISOString(),
     behivas: r.isBehivas,
-    piheno: r.isPihenonap,
   }));
 }
 

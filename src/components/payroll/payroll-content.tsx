@@ -125,13 +125,6 @@ export function PayrollContent({
               sub
             />
           )}
-          {prevCalc.pihenoPotlek > 0 && (
-            <Row
-              label={`Pihenőnap 100% (${fmtH(prevCalc.pihenoH)}h)`}
-              value={`${fmt(prevCalc.pihenoPotlek)} Ft`}
-              sub
-            />
-          )}
           {prevCalc.behivasPotlek > 0 && (
             <Row
               label={`Behívás 200% (${fmtH(prevCalc.behivasH)}h)`}
