@@ -79,24 +79,28 @@ export function ShiftForm({ year, month, onSuccess }: Props) {
         <div className="space-y-3">
           <div className="space-y-1.5">
             <Label className="text-xs">Kezdés</Label>
-            <Input
-              type="datetime-local"
-              value={startTime}
-              onChange={(e) => {
-                setStartTime(e.target.value);
-                setEndTime("");
-              }}
-              className="text-sm"
-            />
+            <div className="overflow-hidden rounded-lg border border-input">
+              <input
+                type="datetime-local"
+                value={startTime}
+                onChange={(e) => {
+                  setStartTime(e.target.value);
+                  setEndTime("");
+                }}
+                className="w-full bg-transparent px-2.5 py-1.5 text-sm outline-none"
+              />
+            </div>
           </div>
           <div className="space-y-1.5">
             <Label className="text-xs">Vége</Label>
-            <Input
-              type="datetime-local"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-              className="text-sm"
-            />
+            <div className="overflow-hidden rounded-lg border border-input">
+              <input
+                type="datetime-local"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                className="w-full bg-transparent px-2.5 py-1.5 text-sm outline-none"
+              />
+            </div>
           </div>
         </div>
 
