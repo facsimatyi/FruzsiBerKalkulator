@@ -134,8 +134,13 @@ export function calcMonthData(
     napszakH[seg.napszak] += seg.fraction;
 
     // Categorize
+    // Ünnep: gets 100% pótlék BUT also counts toward kötelező fulfillment
+    // Pihenő: gets 100% pótlék, excluded from kötelező
+    // Behívás: pending 200% decision based on month-end totals
+    // Regular: counts toward kötelező
     if (seg.unnep) {
       unnepH += seg.fraction;
+      totalRegularH += seg.fraction; // ünnep counts toward kötelező too
     } else if (seg.piheno) {
       pihenoH += seg.fraction;
     } else if (seg.behivas) {
