@@ -1,8 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getAllShiftsForCalc, getSettingsForMonth, getKedvezmeny, getUserSettings } from "@/lib/queries";
+import { getAllShiftsForCalc, getSettingsForMonth, getKedvezmeny, getUserSettings, getAllUserHolidaysForCalc } from "@/lib/queries";
 import { calcMonthData, calcSzja, defaultKedv } from "@/lib/calculations/payroll";
-import { getHolidays } from "@/lib/calculations/holidays";
 import { PayrollContent } from "@/components/payroll/payroll-content";
 
 interface Props {
@@ -21,23 +20,20 @@ export default async function PayrollPage({ searchParams }: Props) {
   const prevM = month === 0 ? 11 : month - 1;
   const prevY = month === 0 ? year - 1 : year;
 
-  const [thisSettings, prevSettings, allShifts, kedvDb, settings] = await Promise.all([
+  const [thisSettings, prevSettings, allShifts, kedvDb, settings, userHolidays] = await Promise.all([
     getSettingsForMonth(session.user.id, year, month),
     getSettingsForMonth(session.user.id, prevY, prevM),
     getAllShiftsForCalc(session.user.id, year),
     getKedvezmeny(session.user.id, year, month),
     getUserSettings(session.user.id),
+    getAllUserHolidaysForCalc(session.user.id),
   ]);
 
   const birthDate = settings?.birthDate ?? null;
   const thisKedv = kedvDb ?? defaultKedv(year, month, birthDate);
 
-  // Holidays
-  const prevHol = getHolidays(prevY);
-  getHolidays(prevY + 1).forEach((v) => prevHol.add(v));
-
   // Previous month pótlékok (these appear on THIS month's bérszám)
-  const prevCalc = calcMonthData(allShifts, prevY, prevM, prevSettings.hoursPerDay, prevSettings.illetmeny, prevHol);
+  const prevCalc = calcMonthData(allShifts, prevY, prevM, prevSettings.hoursPerDay, prevSettings.illetmeny, userHolidays);
 
   // This month's bérszám
   const illetmeny = thisSettings.illetmeny;

@@ -5,6 +5,7 @@ import { AppHeader } from "@/components/layout/app-header";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { DesktopSidebar } from "@/components/layout/desktop-sidebar";
 import { OnboardingForm } from "@/components/onboarding/onboarding-form";
+import { ensureUserHasHolidays } from "@/actions/holiday-actions";
 
 export default async function AppLayout({
   children,
@@ -16,6 +17,9 @@ export default async function AppLayout({
 
   const settings = await getUserSettings(session.user.id);
   const needsOnboarding = !settings || settings.illetmeny === 0;
+
+  // Auto-seed holidays for users who don't have any yet
+  await ensureUserHasHolidays(session.user.id);
 
   if (needsOnboarding) {
     return <OnboardingForm />;

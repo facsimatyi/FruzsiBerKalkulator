@@ -106,7 +106,7 @@ export function PayrollContent({
           )}
           {prevCalc.unnepPotlek > 0 && (
             <Row
-              label={`Ünnepnap 150% (${prevCalc.unnepH.toFixed(1)}h)`}
+              label={`Ünnepnap 100% (${prevCalc.unnepH.toFixed(1)}h)`}
               value={`${fmt(prevCalc.unnepPotlek)} Ft`}
               sub
             />

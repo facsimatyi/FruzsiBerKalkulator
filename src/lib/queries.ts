@@ -1,6 +1,6 @@
 import { eq, and, gte, lt, or, lte, desc, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { shifts, userSettings, kedvezmenyMap, settingsPeriods } from "@/db/schema";
+import { shifts, userSettings, kedvezmenyMap, settingsPeriods, userHolidays } from "@/db/schema";
 import type { ShiftData } from "@/lib/calculations/constants";
 
 export async function getUserSettings(userId: string) {
@@ -162,4 +162,44 @@ export async function getKedvezmeny(
     )
     .limit(1);
   return row ? row.kedvezmenyes : null;
+}
+
+export async function getUserHolidays(userId: string, year?: number) {
+  if (year !== undefined) {
+    const yearStr = String(year);
+    return db
+      .select()
+      .from(userHolidays)
+      .where(
+        and(
+          eq(userHolidays.userId, userId),
+          sql`${userHolidays.date} LIKE ${yearStr + '%'}`
+        )
+      )
+      .orderBy(userHolidays.date);
+  }
+  return db
+    .select()
+    .from(userHolidays)
+    .where(eq(userHolidays.userId, userId))
+    .orderBy(userHolidays.date);
+}
+
+export async function getAllUserHolidaysForCalc(
+  userId: string
+): Promise<{ date: string; startHour: number | null; endHour: number | null }[]> {
+  const rows = await db
+    .select({
+      date: userHolidays.date,
+      startHour: userHolidays.startHour,
+      endHour: userHolidays.endHour,
+    })
+    .from(userHolidays)
+    .where(
+      and(
+        eq(userHolidays.userId, userId),
+        eq(userHolidays.isActive, true)
+      )
+    );
+  return rows;
 }

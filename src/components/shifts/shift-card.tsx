@@ -17,13 +17,16 @@ function dateStrUTC(d: Date): string {
 interface Props {
   shift: ShiftData;
   holidays: Set<string>;
+  clippedH?: number;
 }
 
-export function ShiftCard({ shift, holidays }: Props) {
+export function ShiftCard({ shift, holidays, clippedH }: Props) {
   const [pending, startTransition] = useTransition();
   const s = new Date(shift.start);
   const e = new Date(shift.end);
-  const hours = (e.getTime() - s.getTime()) / 3600000;
+  const fullHours = (e.getTime() - s.getTime()) / 3600000;
+  const hours = clippedH ?? fullHours;
+  const isClipped = clippedH !== undefined && Math.abs(clippedH - fullHours) > 0.01;
   const isHol = holidays.has(dateStrUTC(s));
   const dayName = DN[s.getUTCDay()];
   const endDayName = DN[e.getUTCDay()];
@@ -60,7 +63,7 @@ export function ShiftCard({ shift, holidays }: Props) {
             {pad(e.getUTCHours())}:{pad(e.getUTCMinutes())}
           </span>
           <span className="text-xs text-muted-foreground font-medium">
-            {hours.toFixed(0)}h
+            {hours.toFixed(0)}h{isClipped ? ` (${fullHours.toFixed(0)}h-ból)` : ""}
           </span>
         </div>
         <div className="flex gap-1 mt-1 flex-wrap">

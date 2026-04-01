@@ -1,5 +1,5 @@
-import type { ShiftData, MonthCalcResult } from "./constants";
-import { getHolidays, dateStr, isWeekend } from "./holidays";
+import type { ShiftData, MonthCalcResult, HolidayData } from "./constants";
+import { dateStr, isWeekend } from "./holidays";
 import { getWorkingDays } from "./working-days";
 import { SZJA_CAP } from "./constants";
 
@@ -23,17 +23,35 @@ function clipShiftToMonth(
   return { start: clippedStart, end: clippedEnd };
 }
 
+/**
+ * Check if a specific hour is within a holiday period.
+ * holidays is a Map from date string to holiday data (with optional startHour/endHour).
+ */
+function isHolidayHour(holidayMap: Map<string, HolidayData>, dateKey: string, hour: number): boolean {
+  const h = holidayMap.get(dateKey);
+  if (!h) return false;
+  const start = h.startHour ?? 0;
+  const end = h.endHour ?? 24;
+  return hour >= start && hour < end;
+}
+
 export function calcMonthData(
   shifts: ShiftData[],
   year: number,
   month: number,
   hoursPerDay: number,
   illetmeny: number,
-  holidays: Set<string>
+  holidays: HolidayData[]
 ): MonthCalcResult {
-  const munkaNapok = getWorkingDays(year, month);
+  const munkaNapok = getWorkingDays(year, month, holidays);
   const kotelesOrak = munkaNapok * hoursPerDay;
   const orabér = illetmeny / ((174 * hoursPerDay) / 8);
+
+  // Build holiday lookup map (date -> holiday data)
+  const holidayMap = new Map<string, HolidayData>();
+  for (const h of holidays) {
+    holidayMap.set(h.date, h);
+  }
 
   // Month boundaries for clipping
   const monthStart = new Date(year, month, 1);
@@ -82,7 +100,7 @@ export function calcMonthData(
       segments.push({
         fraction: frac,
         napszak,
-        unnep: holidays.has(ds),
+        unnep: isHolidayHour(holidayMap, ds, h),
         // Hétvége is manual — set via isPihenonap on the shift
         // (OMSZ assigns specific shifts as "hétvége", not all Sat/Sun hours)
         hetvege: false,
@@ -154,7 +172,7 @@ export function calcMonthData(
 
   const delutanPotlek = Math.round(orabér * 0.2 * napszakH.delutan);
   const ejszakaPotlek = Math.round(orabér * 0.5 * napszakH.ejszaka);
-  const unnepPotlek = Math.round(orabér * 1.5 * unnepH);
+  const unnepPotlek = Math.round(orabér * 1.0 * unnepH);
   const hetvegePotlek = Math.round(orabér * 1.0 * hetvegeH);
   const pihenoPotlek = Math.round(orabér * 1.0 * pihenoH);
   const tuloraPotlek = Math.round(orabér * 1.5 * tuloraH);
@@ -216,12 +234,4 @@ export function defaultKedv(y: number, m: number, birthDate?: string | null): bo
   const targetVal = y * 12 + m;
   const turns25Val = turns25Year * 12 + turns25Month;
   return targetVal <= turns25Val;
-}
-
-export function getHolidaysForRange(year: number): Set<string> {
-  const s = new Set<string>();
-  for (let y = year - 1; y <= year + 1; y++) {
-    getHolidays(y).forEach((v) => s.add(v));
-  }
-  return s;
 }

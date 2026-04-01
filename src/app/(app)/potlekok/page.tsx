@@ -1,8 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getAllShiftsForCalc, getSettingsForMonth } from "@/lib/queries";
+import { getAllShiftsForCalc, getSettingsForMonth, getAllUserHolidaysForCalc } from "@/lib/queries";
 import { calcMonthData } from "@/lib/calculations/payroll";
-import { getHolidays } from "@/lib/calculations/holidays";
 import { PotlekokContent } from "@/components/payroll/potlekok-content";
 
 interface Props {
@@ -18,13 +17,11 @@ export default async function PotlekokPage({ searchParams }: Props) {
   const year = Number(params.year) || now.getFullYear();
   const month = Number(params.month ?? now.getMonth());
 
-  const [settings, allShifts] = await Promise.all([
+  const [settings, allShifts, userHolidays] = await Promise.all([
     getSettingsForMonth(session.user.id, year, month),
     getAllShiftsForCalc(session.user.id, year),
+    getAllUserHolidaysForCalc(session.user.id),
   ]);
-
-  const holidays = getHolidays(year);
-  getHolidays(year + 1).forEach((v) => holidays.add(v));
 
   const calc = calcMonthData(
     allShifts,
@@ -32,7 +29,7 @@ export default async function PotlekokPage({ searchParams }: Props) {
     month,
     settings.hoursPerDay,
     settings.illetmeny,
-    holidays
+    userHolidays
   );
 
   return (

@@ -93,6 +93,25 @@ export const settingsPeriods = pgTable(
   ]
 );
 
+export const userHolidays = pgTable(
+  "user_holidays",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD
+    name: varchar("name", { length: 100 }).notNull(),
+    startHour: integer("start_hour"), // null = egész nap (0-tól)
+    endHour: integer("end_hour"),     // null = egész nap (24-ig)
+    isActive: boolean("is_active").notNull().default(true),
+  },
+  (table) => [
+    unique("uq_user_holiday_date").on(table.userId, table.date),
+    index("idx_user_holidays_user").on(table.userId),
+  ]
+);
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -101,3 +120,4 @@ export type Shift = typeof shifts.$inferSelect;
 export type NewShift = typeof shifts.$inferInsert;
 export type KedvezmenyEntry = typeof kedvezmenyMap.$inferSelect;
 export type SettingsPeriod = typeof settingsPeriods.$inferSelect;
+export type UserHoliday = typeof userHolidays.$inferSelect;

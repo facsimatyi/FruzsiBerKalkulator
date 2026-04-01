@@ -1,7 +1,6 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getMonthShifts } from "@/lib/queries";
-import { getHolidays } from "@/lib/calculations/holidays";
+import { getMonthShifts, getAllUserHolidaysForCalc } from "@/lib/queries";
 import { MonthSelector } from "@/components/shared/month-selector";
 import { ShiftsContent } from "@/components/shifts/shifts-content";
 
@@ -18,16 +17,18 @@ export default async function ShiftsPage({ searchParams }: Props) {
   const year = Number(params.year) || now.getFullYear();
   const month = Number(params.month ?? now.getMonth());
 
-  const monthShifts = await getMonthShifts(session.user.id, year, month);
-  const holidays = getHolidays(year);
-  getHolidays(year + 1).forEach((v) => holidays.add(v));
+  const [monthShifts, userHolidays] = await Promise.all([
+    getMonthShifts(session.user.id, year, month),
+    getAllUserHolidaysForCalc(session.user.id),
+  ]);
+  const holidays = userHolidays.map((h) => h.date);
 
   return (
     <ShiftsContent
       year={year}
       month={month}
       shifts={monthShifts}
-      holidays={Array.from(holidays)}
+      holidays={holidays}
     />
   );
 }

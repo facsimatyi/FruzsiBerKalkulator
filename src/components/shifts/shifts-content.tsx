@@ -22,9 +22,17 @@ export function ShiftsContent({ year, month, shifts, holidays }: Props) {
   const [pending, startTransition] = useTransition();
   const holidaySet = new Set(holidays);
 
-  const totalH = shifts.reduce((sum, s) => {
-    return sum + (new Date(s.end).getTime() - new Date(s.start).getTime()) / 3600000;
-  }, 0);
+  // Clip shift hours to the selected month
+  const monthStart = new Date(year, month, 1).getTime();
+  const monthEnd = new Date(year, month + 1, 1).getTime();
+
+  const clippedHours = (s: ShiftData) => {
+    const start = Math.max(new Date(s.start).getTime(), monthStart);
+    const end = Math.min(new Date(s.end).getTime(), monthEnd);
+    return Math.max(0, (end - start) / 3600000);
+  };
+
+  const totalH = shifts.reduce((sum, s) => sum + clippedHours(s), 0);
 
   return (
     <div className="space-y-4">
@@ -70,7 +78,7 @@ export function ShiftsContent({ year, month, shifts, holidays }: Props) {
       ) : (
         <div className="space-y-2">
           {shifts.map((shift) => (
-            <ShiftCard key={shift.id} shift={shift} holidays={holidaySet} />
+            <ShiftCard key={shift.id} shift={shift} holidays={holidaySet} clippedH={clippedHours(shift)} />
           ))}
           <Button
             variant="ghost"

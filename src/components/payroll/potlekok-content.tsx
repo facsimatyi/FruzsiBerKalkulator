@@ -108,7 +108,7 @@ export function PotlekokContent({ year, month, calc, orabér }: Props) {
         </CardHeader>
         <CardContent className="space-y-1">
           <Row
-            label="Ünnepnap (+150%)"
+            label="Ünnepnap (+100%)"
             value={`${calc.unnepH.toFixed(1)}h → ${fmt(calc.unnepPotlek)} Ft`}
             sub
           />

@@ -13,7 +13,8 @@ import { toast } from "sonner";
 import { Plus, Trash2, AlertTriangle, Sun, Moon, Monitor } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
-import type { SettingsPeriod } from "@/db/schema";
+import type { SettingsPeriod, UserHoliday } from "@/db/schema";
+import { HolidaysSection } from "@/components/holidays/holidays-content";
 
 /** Parse number from string, handling Hungarian comma decimal separator and spaces */
 function parseNum(s: string): number {
@@ -39,6 +40,7 @@ interface Props {
   selectedBer: number;
   periods: SettingsPeriod[];
   birthDate: string | null;
+  holidays: UserHoliday[];
 }
 
 export function SettingsContent({
@@ -47,6 +49,7 @@ export function SettingsContent({
   selectedBer: initBer,
   periods: initPeriods,
   birthDate: initBirthDate,
+  holidays,
 }: Props) {
   const [illetmenyStr, setIlletmenyStr] = useState(initIlletmeny > 0 ? fmtInput(initIlletmeny) : "");
   const [hoursStr, setHoursStr] = useState(String(initHours));
@@ -314,6 +317,9 @@ export function SettingsContent({
           <ThemeSelector />
         </CardContent>
       </Card>
+
+      {/* Ünnepnapok szekció */}
+      <HolidaysSection holidays={holidays} />
 
       {/* Profil szekció */}
       <Card>

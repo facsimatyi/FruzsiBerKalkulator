@@ -35,6 +35,12 @@ export const MFULL = [
 
 export const DN = ["V", "H", "K", "Sze", "Cs", "P", "Szo"];
 
+export interface HolidayData {
+  date: string;       // YYYY-MM-DD
+  startHour: number | null; // null = 0 (egész nap)
+  endHour: number | null;   // null = 24 (egész nap)
+}
+
 export interface ShiftData {
   id: string;
   start: string; // ISO datetime
