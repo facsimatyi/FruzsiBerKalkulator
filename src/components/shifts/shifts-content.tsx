@@ -22,9 +22,9 @@ export function ShiftsContent({ year, month, shifts, holidays }: Props) {
   const [pending, startTransition] = useTransition();
   const holidaySet = new Set(holidays);
 
-  // Clip shift hours to the selected month
-  const monthStart = new Date(year, month, 1).getTime();
-  const monthEnd = new Date(year, month + 1, 1).getTime();
+  // Clip shift hours to the selected month (UTC boundaries to match stored shift data)
+  const monthStart = Date.UTC(year, month, 1);
+  const monthEnd = Date.UTC(year, month + 1, 1);
 
   const clippedHours = (s: ShiftData) => {
     const start = Math.max(new Date(s.start).getTime(), monthStart);
