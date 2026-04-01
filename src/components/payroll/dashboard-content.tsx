@@ -2,7 +2,7 @@
 
 import { MonthSelector } from "@/components/shared/month-selector";
 import { Card, CardContent } from "@/components/ui/card";
-import { MFULL, fmt, type MonthCalcResult } from "@/lib/calculations/constants";
+import { MFULL, fmt, fmtH, type MonthCalcResult } from "@/lib/calculations/constants";
 import { Clock, TrendingUp, Wallet, DollarSign } from "lucide-react";
 import { toggleKedvezmeny } from "@/actions/kedvezmeny-actions";
 import { cn } from "@/lib/utils";
@@ -81,7 +81,7 @@ export function DashboardContent({
       <div className="space-y-1.5">
         <div className="flex justify-between text-xs">
           <span className="text-muted-foreground">
-            {calc.totalH.toFixed(1)}h / {calc.kotelesOrak.toFixed(1)}h kötelező
+            {fmtH(calc.totalH)}h / {fmtH(calc.kotelesOrak)}h kötelező
           </span>
           <span
             className={cn(
@@ -94,9 +94,9 @@ export function DashboardContent({
             )}
           >
             {calc.totalH > calc.kotelesOrak
-              ? `+${(calc.totalH - calc.kotelesOrak).toFixed(1)}h túlóra`
+              ? `+${fmtH(calc.totalH - calc.kotelesOrak)}h túlóra`
               : calc.totalH > 0
-              ? `${(calc.kotelesOrak - calc.totalH).toFixed(1)}h hátra`
+              ? `${fmtH(calc.kotelesOrak - calc.totalH)}h hátra`
               : "—"}
           </span>
         </div>

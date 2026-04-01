@@ -3,7 +3,7 @@
 import { MonthSelector } from "@/components/shared/month-selector";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { MFULL, fmt, type MonthCalcResult } from "@/lib/calculations/constants";
+import { MFULL, fmt, fmtH, type MonthCalcResult } from "@/lib/calculations/constants";
 
 interface RowProps {
   label: string;
@@ -74,17 +74,17 @@ export function PotlekokContent({ year, month, calc, orabér }: Props) {
         <CardContent className="space-y-1">
           <Row
             label="Normál 06–14"
-            value={`${calc.napszakH.normal.toFixed(1)}h`}
+            value={`${fmtH(calc.napszakH.normal)}h`}
             sub
           />
           <Row
             label="Délutáni 14–22 (20%)"
-            value={`${calc.napszakH.delutan.toFixed(1)}h → ${fmt(calc.delutanPotlek)} Ft`}
+            value={`${fmtH(calc.napszakH.delutan)}h → ${fmt(calc.delutanPotlek)} Ft`}
             sub
           />
           <Row
             label="Éjszakai 22–06 (50%)"
-            value={`${calc.napszakH.ejszaka.toFixed(1)}h → ${fmt(calc.ejszakaPotlek)} Ft`}
+            value={`${fmtH(calc.napszakH.ejszaka)}h → ${fmt(calc.ejszakaPotlek)} Ft`}
             sub
           />
           <Separator className="my-2" />
@@ -109,27 +109,27 @@ export function PotlekokContent({ year, month, calc, orabér }: Props) {
         <CardContent className="space-y-1">
           <Row
             label="Ünnepnap (+100%)"
-            value={`${calc.unnepH.toFixed(1)}h → ${fmt(calc.unnepPotlek)} Ft`}
+            value={`${fmtH(calc.unnepH)}h → ${fmt(calc.unnepPotlek)} Ft`}
             sub
           />
           <Row
             label="Hétvége (+100%)"
-            value={`${calc.hetvegeH.toFixed(1)}h → ${fmt(calc.hetvegePotlek)} Ft`}
+            value={`${fmtH(calc.hetvegeH)}h → ${fmt(calc.hetvegePotlek)} Ft`}
             sub
           />
           <Row
             label="Pihenőnap (+100%)"
-            value={`${calc.pihenoH.toFixed(1)}h → ${fmt(calc.pihenoPotlek)} Ft`}
+            value={`${fmtH(calc.pihenoH)}h → ${fmt(calc.pihenoPotlek)} Ft`}
             sub
           />
           <Row
             label="Túlóra (+150%)"
-            value={`${calc.tuloraH.toFixed(1)}h → ${fmt(calc.tuloraPotlek)} Ft`}
+            value={`${fmtH(calc.tuloraH)}h → ${fmt(calc.tuloraPotlek)} Ft`}
             sub
           />
           <Row
             label="Behívás (+200%)"
-            value={`${calc.behivasH.toFixed(1)}h → ${fmt(calc.behivasPotlek)} Ft`}
+            value={`${fmtH(calc.behivasH)}h → ${fmt(calc.behivasPotlek)} Ft`}
             sub
           />
           <Separator className="my-2" />
@@ -147,8 +147,8 @@ export function PotlekokContent({ year, month, calc, orabér }: Props) {
           <CardTitle className="text-sm">Órák összesítő</CardTitle>
         </CardHeader>
         <CardContent className="space-y-1">
-          <Row label="Ledolgozott" value={`${calc.totalH.toFixed(1)}h`} />
-          <Row label="Kötelező" value={`${calc.kotelesOrak.toFixed(1)}h`} />
+          <Row label="Ledolgozott" value={`${fmtH(calc.totalH)}h`} />
+          <Row label="Kötelező" value={`${fmtH(calc.kotelesOrak)}h`} />
           <Row
             label="Munkanapok"
             value={`${calc.munkaNapok} nap`}

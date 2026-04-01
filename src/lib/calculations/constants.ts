@@ -74,3 +74,9 @@ export interface MonthCalcResult {
 }
 
 export const fmt = (n: number) => Math.round(n).toLocaleString("hu-HU");
+
+/** Format hours: 8 → "8", 7.15 → "7.15", 7.1 → "7.10" */
+export const fmtH = (n: number) => {
+  if (Number.isInteger(n)) return String(n);
+  return n.toFixed(2);
+};

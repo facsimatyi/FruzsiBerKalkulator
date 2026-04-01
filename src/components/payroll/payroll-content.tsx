@@ -3,7 +3,7 @@
 import { MonthSelector } from "@/components/shared/month-selector";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { MHU, MFULL, fmt, type MonthCalcResult } from "@/lib/calculations/constants";
+import { MHU, MFULL, fmt, fmtH, type MonthCalcResult } from "@/lib/calculations/constants";
 
 interface RowProps {
   label: string;
@@ -92,49 +92,49 @@ export function PayrollContent({
 
           {prevCalc.delutanPotlek > 0 && (
             <Row
-              label={`Délutáni 20% (${prevCalc.napszakH.delutan.toFixed(1)}h)`}
+              label={`Délutáni 20% (${fmtH(prevCalc.napszakH.delutan)}h)`}
               value={`${fmt(prevCalc.delutanPotlek)} Ft`}
               sub
             />
           )}
           {prevCalc.ejszakaPotlek > 0 && (
             <Row
-              label={`Éjszakai 50% (${prevCalc.napszakH.ejszaka.toFixed(1)}h)`}
+              label={`Éjszakai 50% (${fmtH(prevCalc.napszakH.ejszaka)}h)`}
               value={`${fmt(prevCalc.ejszakaPotlek)} Ft`}
               sub
             />
           )}
           {prevCalc.unnepPotlek > 0 && (
             <Row
-              label={`Ünnepnap 100% (${prevCalc.unnepH.toFixed(1)}h)`}
+              label={`Ünnepnap 100% (${fmtH(prevCalc.unnepH)}h)`}
               value={`${fmt(prevCalc.unnepPotlek)} Ft`}
               sub
             />
           )}
           {prevCalc.tuloraPotlek > 0 && (
             <Row
-              label={`Túlóra 150% (${prevCalc.tuloraH.toFixed(1)}h)`}
+              label={`Túlóra 150% (${fmtH(prevCalc.tuloraH)}h)`}
               value={`${fmt(prevCalc.tuloraPotlek)} Ft`}
               sub
             />
           )}
           {prevCalc.hetvegePotlek > 0 && (
             <Row
-              label={`Hétvége 100% (${prevCalc.hetvegeH.toFixed(1)}h)`}
+              label={`Hétvége 100% (${fmtH(prevCalc.hetvegeH)}h)`}
               value={`${fmt(prevCalc.hetvegePotlek)} Ft`}
               sub
             />
           )}
           {prevCalc.pihenoPotlek > 0 && (
             <Row
-              label={`Pihenőnap 100% (${prevCalc.pihenoH.toFixed(1)}h)`}
+              label={`Pihenőnap 100% (${fmtH(prevCalc.pihenoH)}h)`}
               value={`${fmt(prevCalc.pihenoPotlek)} Ft`}
               sub
             />
           )}
           {prevCalc.behivasPotlek > 0 && (
             <Row
-              label={`Behívás 200% (${prevCalc.behivasH.toFixed(1)}h)`}
+              label={`Behívás 200% (${fmtH(prevCalc.behivasH)}h)`}
               value={`${fmt(prevCalc.behivasPotlek)} Ft`}
               sub
             />
